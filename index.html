@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso: PI & Indústria Espacial</title>
+    <!-- Chosen Palette: Brilliant Blues (Fundo: #f8f9fa, Principal: #343a40, Acento: #007bff) -->
+    <!-- Application Structure Plan: A SPA com layout de duas colunas. Navegação lateral fixa à esquerda para os 9 módulos (incluindo Referências). Conteúdo principal à direita com seções expansíveis (accordion) por módulo. Esta estrutura hierárquica (módulo -> tópico) é ideal para cursos, facilitando a navegação e o foco. Player de áudio com arquivo WAV real na introdução. Múltiplos gráficos interativos (Chart.js) e diagramas conceituais (HTML/CSS) baseados nas fontes fornecidas (WIPO, PDFs) para enriquecer a visualização de dados e conceitos. -->
+    <!-- Visualization & Content Choices:
+        - Podcast Intro (Inform): Player de áudio HTML5 para o arquivo WAV fornecido.
+        - Crescimento Setor Espacial (Change): Line Chart (Chart.js) - tendência de patentes global (WIPOSpace).
+        - Megatendências Proporção (Compare/Inform): Donut Chart (Chart.js) - (WIPOSpace).
+        - Detalhes das Megatendências (Change): Múltiplos Line Charts (Chart.js) para subcategorias (Propulsão Sustentável, Automação, Com&Seg, HMI) e Tecnologias Emergentes (Manufatura Aditiva, Blockchain) - baseados em WIPOSpace Figs D16, D25, D34, D43, D52, D54, D56, D58.
+        - Líderes Globais em PI (Compare/Organize): Horizontal Bar Charts (Chart.js) - países e empresas em geral e por sub-tecnologia (WIPOSpace Figs D7, D13, D22, D31, D40, D49, D55, D59).
+        - RSI (Change/Compare): Line Charts (Chart.js) para evolução do RSI de países chave em tendências (WIPOSpace Figs D12, D21, D30, D39, D48).
+        - Conceitos Chave (Organize/Relate): Diagramas HTML/CSS para Hélice Tríplice, Contratos de Offset/TT (PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf), Modalidades de PI (GuiaDocente), Estratégia de PI. Arquitetura SAG-IoT e PoST para Blockchain (artigos de blockchain).
+        - PI Aeroespacial no Brasil (Compare/Inform): Pie/Bar Charts (Chart.js) para tipo de depositante e tecnologias (42426-Texto do Artigo...).
+        Interações: Hover (tooltips), on-scroll (animações de gráficos), click (accordion, player). Sem SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: #f8f9fa; /* Fundo Principal (Branco Suave) */
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #007bff; /* Azul Brilhante Acento */
+            color: white;
+            transform: translateX(4px);
+        }
+        .module-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .module-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, padding-top 0.3s ease-in-out, padding-bottom 0.3s ease-in-out;
+        }
+        .accordion-header.active + .accordion-content {
+           padding-top: 0.75rem;
+           padding-bottom: 0.75rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px; /* Ajustado para melhor encaixe */
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px; /* Ajustado */
+            max-height: 380px; /* Ajustado */
+        }
+         .small-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 260px; 
+            max-height: 300px;
+        }
+         .pie-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px; /* Ajustado */
+            margin-left: auto;
+            margin-right: auto;
+            height: 280px; /* Ajustado */
+            max-height: 330px;
+        }
+
+        h1, h2, h3, h4, .accordion-header {
+            color: #343a40; /* Cinza Escuro Principal */
+        }
+        p, li, .podcast-text, .ref-item {
+            color: #495057; /* Cinza Médio para texto */
+        }
+        .bg-gray-800 { background-color: #343a40; } /* Sidebar */
+        .bg-gray-100 { background-color: #e9ecef; } /* Conteúdo Principal de fundo */
+        .text-accent { color: #007bff; }
+        .bg-accent { background-color: #007bff; }
+        .border-accent { border-color: #007bff; }
+
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+
+        .podcast-player button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-right: 8px;
+            transition: background-color 0.2s;
+        }
+        .podcast-player button:hover {
+            background-color: #0056b3;
+        }
+        .podcast-player button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        /* Hélice Tríplice Diagrama */
+        .helice-container { display: flex; justify-content: space-around; align-items: center; margin-top: 1rem; padding: 1rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .helice-node { text-align: center; padding: 0.5rem; border: 2px solid #007bff; border-radius: 50%; width: 100px; height: 100px; display: flex; flex-direction: column; justify-content: center; background-color: #e7f3ff;}
+        .helice-node strong { font-size: 0.9rem; color: #343a40;}
+        .helice-arrows { font-size: 1.5rem; color: #007bff; margin: 0 0.5rem;}
+
+        /* Fluxograma de Estratégia de PI e Offset/TT */
+        .flow-container { margin-top: 1rem; padding: 1rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .flow-item { background-color: #e7f3ff; border: 1px solid #007bff; padding: 0.75rem; border-radius: 6px; text-align: center; margin-bottom: 0.75rem; }
+        .flow-item strong {color: #0056b3;}
+        .flow-connector { text-align: center; font-size: 1.5rem; color: #007bff; margin: 0.25rem 0; }
+        
+        /* Estilo para Diagrama de Modalidades de PI */
+        .pi-modalities-container { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top:1rem; padding:1rem; background-color: #fff; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+        .pi-branch { background-color: #007bff; color:white; padding:0.5rem 1rem; border-radius: 4px; font-weight: bold; margin-bottom: 0.5rem; }
+        .pi-sub-branch-container { display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;}
+        .pi-sub-branch { background-color: #e7f3ff; color: #343a40; padding:0.25rem 0.75rem; border:1px solid #007bff; border-radius:4px; font-size:0.9rem;}
+
+        /* Estilo para SAG-IoT e Blockchain */
+        .sag-iot-diagram { background-color: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 1rem; }
+        .sag-layer { border: 2px dashed #007bff; padding: 0.75rem; margin-bottom: 0.75rem; border-radius: 6px; text-align: center; }
+        .sag-layer-title { font-weight: bold; color: #0056b3; margin-bottom: 0.5rem; }
+        .sag-connector { text-align: center; font-size: 1.5rem; color: #007bff; margin: 0.25rem auto; display: block; width: fit-content; }
+        .blockchain-integration { background-color: #e7f3ff; padding: 0.5rem; border-radius: 4px; border: 1px solid #007bff; text-align: center; margin-top: 0.5rem; font-style: italic; font-size: 0.9rem; }
+
+
+        @media (max-width: 768px) {
+            .chart-container, .pie-chart-container, .small-chart-container {
+                height: 250px; 
+            }
+            .helice-container { flex-direction: column; }
+            .helice-node { margin-bottom: 0.5rem; width: 90px; height: 90px; }
+            .helice-arrows { transform: rotate(90deg); margin: 0.5rem 0; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar de Navegação -->
+        <aside class="w-full md:w-1/4 bg-gray-800 text-white p-6 sticky top-0 md:h-screen overflow-y-auto">
+            <h1 class="text-2xl font-bold mb-6 text-white">Módulos do Curso</h1>
+            <nav id="course-nav">
+                <ul>
+                    <li><a href="#module1" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 1: Introdução à PI</a></li>
+                    <li><a href="#module2" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 2: Modalidades de PI</a></li>
+                    <li><a href="#module3" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 3: O Sistema Brasileiro de PI</a></li>
+                    <li><a href="#module4" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 4: A Indústria Espacial</a></li>
+                    <li><a href="#module5" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 5: PI no Setor Espacial Global</a></li>
+                    <li><a href="#module6" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 6: PI e a Indústria Espacial Brasileira</a></li>
+                    <li><a href="#module7" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 7: Gestão Estratégica da PI</a></li>
+                    <li><a href="#module8" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Módulo 8: Estudos de Caso e Futuro</a></li>
+                    <li><a href="#moduleReferences" class="nav-link block p-3 rounded-lg mb-2 hover:bg-gray-700">Referências</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="w-full md:w-3/4 p-6 md:p-10 bg-gray-100 overflow-y-auto">
+            <header class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900">PI & Indústria Espacial</h1>
+                <p class="mt-2 text-lg text-gray-600">Uma exploração interativa dos conceitos, leis e tendências que moldam a inovação no setor espacial.</p>
+            </header>
+
+            <!-- Módulo 1 -->
+            <div id="module1" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 1: Introdução à Propriedade Intelectual (PI)</h2>
+                <p class="mb-6 text-gray-700">Este módulo estabelece as bases, explicando o que é Propriedade Intelectual e por que ela é um pilar fundamental para a inovação e o desenvolvimento econômico. Você explorará os conceitos históricos e teóricos que justificam a proteção das criações da mente humana.</p>
+                <div class="mt-6 bg-white p-4 rounded-lg shadow podcast-player" style="margin-bottom: 20px">
+                    <h4 class="text-lg font-semibold mb-2 text-accent">Podcast Introdutório</h4>
+                    <p class="podcast-text mb-3 text-sm">Ouça uma breve introdução ao curso e à importância da Propriedade Intelectual para o setor espacial.</p>
+                    <audio id="podcastAudio" src="https://inovacad.github.io/black/podcastintro-pi-industriaespacial.wav" preload="auto"></audio>
+                    <button id="playPodcastBtn">▶️ Play</button>
+                    <button id="pausePodcastBtn" disabled>⏸️ Pause</button>
+                </div>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>O que é Propriedade Intelectual?</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">A Propriedade Intelectual (PI) refere-se, em sentido amplo, às <strong class="font-medium">criações do espírito humano</strong>. Segundo a Organização Mundial da Propriedade Intelectual (OMPI), ela abrange os direitos relativos a obras literárias, artísticas e científicas, invenções em todos os domínios da atividade humana, descobertas científicas, desenhos e modelos industriais, marcas industriais, comerciais e de serviço, bem como nomes e denominações comerciais, e todos os outros direitos inerentes à atividade intelectual nos campos industrial, científico, literário e artístico. ([GuiaDocente Cap. 2.2])</p>
+                            <p class="mb-2">É crucial entender que a PI é um <strong class="font-medium">ativo intangível</strong>. Isso significa que o direito de propriedade não reside no objeto físico em si (como um livro impresso ou um protótipo de uma invenção), mas sim na <strong class="font-medium">informação ou conhecimento</strong> incorporado nesse objeto. Por exemplo, ao comprar um livro, você adquire o objeto físico, mas os direitos autorais sobre o conteúdo (a história, os personagens, a forma de expressão) permanecem com o autor ou titular dos direitos ([GuiaDocente Cap. 2.2]). Da mesma forma, uma patente protege a ideia inventiva e a solução técnica, não apenas um exemplar da máquina inventada ([IntroIP Ch. 1.1]).</p>
+                            <p>A PI se divide em grandes ramos, que serão explorados em detalhes no Módulo 2: <strong class="font-medium">Direito Autoral</strong> (protegendo obras expressivas), <strong class="font-medium">Propriedade Industrial</strong> (protegendo invenções, marcas, desenhos industriais, indicações geográficas) e <strong class="font-medium">Proteções Sui Generis</strong> (categorias específicas como topografias de circuitos integrados e cultivares). ([GuiaDocente Fig. 2])</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Importância e Benefícios da PI</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">A Propriedade Intelectual é um motor fundamental para o progresso e a prosperidade. Ao garantir direitos exclusivos aos criadores sobre suas obras e invenções, o sistema de PI estabelece um <strong class="font-medium">"Ciclo Virtuoso"</strong> ([GuiaDocente Fig. 1]) que beneficia tanto os indivíduos quanto a sociedade como um todo:</p>
+                            <ul class="list-disc pl-5 mb-3 space-y-1">
+                                <li><strong class="font-medium">Para o Criador/Inventor:</strong> Estimula a <strong class="font-medium">criatividade e a inovação</strong>, oferecendo a perspectiva de <strong class="font-medium">retorno econômico</strong> (lucro pela exploração comercial) e <strong class="font-medium">reconhecimento</strong> (crédito pela autoria ou invenção). Esse incentivo é vital para que novas ideias continuem a surgir. ([GuiaDocente Cap. 2.1])</li>
+                                <li><strong class="font-medium">Para a Sociedade:</strong> A divulgação das criações (especialmente no caso de patentes) contribui para o avanço da <strong class="font-medium">cultura e da tecnologia</strong> e para a melhoria da <strong class="font-medium">qualidade de vida</strong>. A exploração comercial dessas inovações leva à <strong class="font-medium">geração de riqueza</strong>, empregos e ao desenvolvimento de novos produtos e serviços, além da <strong class="font-medium">disseminação do conhecimento</strong>. ([GuiaDocente Fig. 1], [IntroIP Ch. 1.1])</li>
+                            </ul>
+                            <p class="mb-2">Especificamente, a PI oferece:</p>
+                             <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Incentivo à P&D:</strong> Empresas investem em pesquisa e desenvolvimento sabendo que podem proteger suas inovações, garantindo uma vantagem competitiva. ([GuiaDocente Apresentação])</li>
+                                <li><strong class="font-medium">Valorização de Ativos:</strong> Direitos de PI são ativos valiosos que podem ser licenciados, vendidos ou usados como garantia, aumentando o valor de uma empresa.</li>
+                                <li><strong class="font-medium">Segurança Jurídica:</strong> Define claramente quem tem o direito de explorar uma criação, prevenindo cópias não autorizadas e concorrência desleal.</li>
+                                <li><strong class="font-medium">Acesso ao Conhecimento:</strong> A exigência de descrição detalhada em documentos de patente, por exemplo, torna público o conhecimento técnico, permitindo que outros aprendam e construam sobre inovações anteriores (após o término do prazo de proteção ou com licença). ([IntroIP Ch. 1.1])</li>
+                                <li><strong class="font-medium">Fomento à Competição Justa:</strong> Marcas, por exemplo, permitem que consumidores identifiquem a origem e a qualidade dos produtos, promovendo uma competição baseada na reputação e na diferenciação.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Histórico e Justificativas da Proteção</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-3"><strong class="font-medium">Raízes Históricas:</strong> A noção de proteger criações intelectuais não é recente. Embora haja indícios de incentivos a inventores na Grécia Antiga ([IntroIP Ch. 1.2]), os primeiros sistemas formais de patentes surgiram na <strong class="font-medium">República de Veneza no século XV</strong> (por volta de 1474). Essas leis iniciais já reconheciam a necessidade de conceder privilégios temporários aos inventores em troca da divulgação de suas técnicas, especialmente em áreas como a fabricação de vidro. ([GuiaDocente Cap. 2.1])</p>
+                           <p class="mb-3">Na Inglaterra, o <strong class="font-medium">"Statute of Monopolies" de 1624</strong> foi um marco, limitando a concessão de monopólios reais e restringindo patentes a "novas manufaturas" ([IntroIP Ch. 1.2]). Ao longo dos séculos seguintes, os sistemas evoluíram, e a necessidade de cooperação internacional tornou-se evidente com a expansão do comércio. Isso levou à <strong class="font-medium">Convenção da União de Paris (CUP) em 1883</strong>, que estabeleceu princípios como tratamento nacional e direito de prioridade para patentes, marcas e desenhos industriais, e à <strong class="font-medium">Convenção de Berna em 1886</strong>, focada na proteção de obras literárias e artísticas. ([GuiaDocente Cap. 2.1])</p>
+                           <p class="mb-3">Mais recentemente, o <strong class="font-medium">Acordo TRIPS (1994)</strong>, no âmbito da Organização Mundial do Comércio (OMC), harmonizou padrões mínimos de proteção da PI entre os países membros, integrando a PI de forma mais robusta ao sistema de comércio global. ([GuiaDocente Cap. 2.1])</p>
+                           <p class="mb-1"><strong class="font-medium">Justificativas para a Proteção ([IntroIP Ch. 1.1]):</strong></p>
+                           <ul class="list-disc pl-5 space-y-2">
+                               <li><strong class="font-medium">Teoria do Contrato Social (ou Barganha):</strong> Esta é uma das justificativas mais influentes. Argumenta-se que existe um "acordo" implícito entre o criador e a sociedade. A sociedade concede ao criador um direito exclusivo temporário sobre sua criação (ex: uma patente por 20 anos). Em troca, o criador deve <strong class="font-medium">divulgar plenamente</strong> sua invenção ou obra. Após o período de exclusividade, a criação entra em domínio público, enriquecendo o conhecimento coletivo e permitindo que todos a utilizem livremente. Isso promove o progresso e a inovação contínua.</li>
+                               <li><strong class="font-medium">Teoria dos Direitos Naturais:</strong> Baseada na filosofia de pensadores como John Locke, esta teoria sustenta que os indivíduos têm um direito moral e natural aos frutos de seu trabalho, seja ele físico ou intelectual. Assim como alguém tem direito à terra que cultiva, um inventor ou autor teria um direito inerente à sua invenção ou obra literária. O sistema de PI, nessa visão, apenas reconhece e formaliza esse direito preexistente.</li>
+                               <li><strong class="font-medium">Incentivo Econômico e ao Investimento:</strong> A proteção da PI é vista como essencial para encorajar o investimento em pesquisa, desenvolvimento e atividades criativas. Sem a perspectiva de exclusividade e retorno financeiro, haveria menos incentivo para empresas e indivíduos dedicarem tempo e recursos à criação de novas tecnologias, medicamentos, obras de arte, etc. A PI permite recuperar os custos de P&D e lucrar com a inovação.</li>
+                               <li><strong class="font-medium">Promoção da Concorrência e da Diversidade:</strong> Ao proteger marcas, por exemplo, o sistema permite que as empresas construam reputações e que os consumidores façam escolhas informadas, fomentando uma concorrência baseada na qualidade e na inovação. No campo cultural, o direito autoral incentiva a criação de uma diversidade de obras.</li>
+                               <li><strong class="font-medium">Disseminação Ordenada do Conhecimento:</strong> Em vez de manter as invenções em segredo (como no caso dos segredos industriais), o sistema de patentes incentiva a sua divulgação detalhada, contribuindo para o acervo tecnológico da humanidade e evitando a duplicação de esforços de pesquisa.</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 2 -->
+            <div id="module2" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 2: Modalidades de Propriedade Intelectual</h2>
+                <p class="mb-6 text-gray-700">Aqui, detalhamos as diferentes formas de proteção da PI. Cada categoria — Direito Autoral e Conexos, Propriedade Industrial e Proteções Sui Generis — possui suas próprias regras, requisitos e âmbitos de proteção, todos cruciais para uma estratégia de proteção eficaz, especialmente no contexto brasileiro e com aplicações potenciais no setor espacial.</p>
+                
+                 <div class="mb-6 bg-white p-4 rounded-lg shadow">
+                     <h4 class="text-lg font-semibold text-center mb-2 text-accent">Visão Geral das Modalidades de PI</h4>
+                     <div class="pi-modalities-container">
+                        <div class="pi-branch">Direito Autoral e Conexos</div>
+                        <div class="pi-sub-branch-container">
+                            <div class="pi-sub-branch">Obras Literárias</div>
+                            <div class="pi-sub-branch">Obras Artísticas</div>
+                            <div class="pi-sub-branch">Obras Científicas</div>
+                            <div class="pi-sub-branch">Software</div>
+                            <div class="pi-sub-branch">Direitos de Intérpretes</div>
+                        </div>
+                        <div class="pi-branch">Propriedade Industrial</div>
+                         <div class="pi-sub-branch-container">
+                            <div class="pi-sub-branch">Patentes de Invenção</div>
+                            <div class="pi-sub-branch">Modelos de Utilidade</div>
+                            <div class="pi-sub-branch">Desenhos Industriais</div>
+                            <div class="pi-sub-branch">Marcas</div>
+                            <div class="pi-sub-branch">Indicações Geográficas</div>
+                             <div class="pi-sub-branch">Segredos Industriais</div>
+                        </div>
+                        <div class="pi-branch">Proteções Sui Generis</div>
+                        <div class="pi-sub-branch-container">
+                            <div class="pi-sub-branch">Topografia de Circuitos Integrados</div>
+                            <div class="pi-sub-branch">Cultivares</div>
+                            <div class="pi-sub-branch">Conhecimentos Tradicionais</div>
+                        </div>
+                     </div>
+                      <p class="text-center text-xs mt-2 text-gray-500">Diagrama conceitual. Fonte: Adaptado de GuiaDocente Fig. 2.</p>
+                 </div>
+
+                 <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>A. Direito Autoral e Conexos</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">Regido no Brasil pela Lei nº 9.610/98 (Lei de Direito Autoral - LDA), protege as <strong class="font-medium">obras do espírito expressas por qualquer meio ou fixadas em qualquer suporte</strong>, tangível ou intangível, conhecido ou que se invente no futuro. A proteção surge com a criação da obra, independentemente de registro, embora o registro (ex: na Biblioteca Nacional para obras literárias, Escritório de Direitos Autorais da Fundação Biblioteca Nacional) possa facilitar a prova de autoria e seja necessário para certas ações judiciais ([IntroIP Ch. 3.1], [GuiaDocente Cap. 3.2]).</p>
+                           <p class="mb-2"><strong class="font-medium">Obras Protegidas ([GuiaDocente Cap. 3.2], [IntroIP Ch. 3.4]):</strong> A LDA exemplifica: textos literários, artísticos ou científicos; conferências, alocuções, sermões; obras dramáticas e dramático-musicais; obras coreográficas e pantomímicas; composições musicais (com ou sem letra); obras audiovisuais (sonorizadas ou não, incluindo as cinematográficas); obras fotográficas; desenhos, pinturas, gravuras, esculturas, litografia, arte cinética; ilustrações, cartas geográficas; projetos, esboços e obras plásticas concernentes à geografia, engenharia, topografia, arquitetura, paisagismo, cenografia e ciência; adaptações, traduções e outras transformações de obras originais, apresentadas como criação intelectual nova; coletâneas ou compilações (antologias, enciclopédias, dicionários, bases de dados), desde que constituam criação intelectual; e programas de computador.</p>
+                           <p class="mb-2"><strong class="font-medium">O que NÃO é protegido por Direito Autoral ([GuiaDocente Cap. 3.2]):</strong> Ideias, procedimentos normativos, sistemas, métodos, projetos ou conceitos matemáticos em si; esquemas, planos ou regras para realizar atos mentais, jogos ou negócios; formulários em branco; textos de tratados, leis, decretos, decisões judiciais; informações de uso comum (calendários, agendas); nomes e títulos isolados; aproveitamento industrial ou comercial das ideias contidas nas obras. A proteção recai sobre a <strong class="font-medium">forma de expressão</strong> da ideia, e não sobre a ideia em si ([IntroIP Ch. 3.4]).</p>
+                           <p class="mb-2"><strong class="font-medium">Direitos Morais e Patrimoniais ([GuiaDocente Cap. 3.2]):</strong></p>
+                           <ul class="list-disc pl-5 mb-2 space-y-1">
+                               <li><strong class="font-medium">Morais:</strong> São personalíssimos, inalienáveis e irrenunciáveis. Incluem o direito de reivindicar a qualquer tempo a autoria da obra; ter seu nome, pseudônimo ou sinal convencional indicado ou anunciado como sendo o do autor, na utilização de sua obra; conservar a obra inédita; assegurar a integridade da obra, opondo-se a quaisquer modificações ou à prática de atos que, de qualquer forma, possam prejudicá-la ou atingi-lo, como autor, em sua reputação ou honra. Persistem mesmo após a cessão dos direitos patrimoniais.</li>
+                               <li><strong class="font-medium">Patrimoniais:</strong> Referem-se ao direito exclusivo do autor de utilizar, fruir e dispor da obra literária, artística ou científica. Dependem de autorização prévia e expressa do autor quaisquer formas de utilização, como a reprodução parcial ou integral; edição; adaptação, arranjo musical; tradução; inclusão em fonograma ou produção audiovisual; distribuição; execução pública; radiodifusão; exposição; inclusão em base de dados, etc. Podem ser cedidos ou licenciados a terceiros.</li>
+                           </ul>
+                           <p class="mb-2"><strong class="font-medium">Software (Programas de Computador) ([GuiaDocente Cap. 3.4]):</strong> Possui regime jurídico próprio (Lei nº 9.609/98 - Lei do Software) e é protegido subsidiariamente pela LDA como obra literária. A proteção abrange o código-fonte e o código-objeto. O registro no INPI é opcional, mas confere maior segurança jurídica e é condição para validade de certos contratos. A titularidade de software desenvolvido por empregado ou prestador de serviço, salvo estipulação em contrário, pertence ao empregador/contratante.</p>
+                           <p class="mb-2"><strong class="font-medium">Direitos Conexos ([GuiaDocente Cap. 3.3]):</strong> Protegem os direitos de artistas intérpretes ou executantes (cantores, músicos, atores sobre suas interpretações), produtores fonográficos (quem fixa os sons de uma execução) e empresas de radiodifusão (sobre suas emissões), respectivamente. São distintos, mas ligados ao direito autoral da obra original.</p>
+                           <p class="mb-2"><strong class="font-medium">Duração da Proteção ([GuiaDocente Cap. 3.2, 3.4], [IntroIP Ch. 3.5]):</strong></p>
+                            <ul class="list-disc pl-5 mb-2 space-y-1">
+                               <li>Direitos Patrimoniais do Autor: 70 anos contados de 1º de janeiro do ano subsequente ao de seu falecimento. Para obras anônimas/pseudônimas ou audiovisuais/fotográficas, 70 anos da divulgação.</li>
+                               <li>Software: 50 anos a partir de 1º de janeiro do ano subsequente ao da sua publicação ou, na ausência desta, da sua criação.</li>
+                               <li>Direitos Conexos: 70 anos da fixação (fonogramas), transmissão (radiodifusão) ou execução pública.</li>
+                           </ul>
+                           <p class="mb-2"><strong class="font-medium">Limitações e Exceções (Uso Livre/Fair Use) ([GuiaDocente Cap. 3.2], [IntroIP Ch. 3.7]):</strong> A LDA (Art. 46 a 48) prevê situações em que o uso de obras protegidas não constitui ofensa, como: citação para fins de estudo, crítica ou polêmica; reprodução de pequenos trechos para uso privado do copista sem intuito de lucro; representação teatral e execução musical em ambiente familiar ou para fins exclusivamente didáticos sem fins lucrativos. O conceito de "fair use" do direito americano é mais amplo e baseado em quatro fatores, mas a legislação brasileira é mais taxativa.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>B. Propriedade Industrial</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">Regulada no Brasil pela Lei nº 9.279/96 (Lei da Propriedade Industrial - LPI), abrange direitos sobre invenções, modelos de utilidade, desenhos industriais, marcas e indicações geográficas. A proteção é concedida mediante registro ou patente expedida pelo INPI.</p>
+                            <p class="mb-2"><strong class="font-medium">Patentes (de Invenção e de Modelo de Utilidade) ([GuiaDocente Cap. 4.4], [IntroIP Ch. 1]):</strong></p>
+                            <ul class="list-disc pl-5 mb-2 space-y-1">
+                                <li><strong class="font-medium">Invenção (PI):</strong> Produto ou processo que atenda aos requisitos de <strong class="font-medium">novidade</strong> (não estar compreendido no estado da técnica mundial antes da data do depósito), <strong class="font-medium">atividade inventiva</strong> (não decorrer de maneira evidente ou óbvia do estado da técnica para um técnico no assunto) e <strong class="font-medium">aplicação industrial</strong> (poder ser utilizado ou produzido em qualquer tipo de indústria).</li>
+                                <li><strong class="font-medium">Modelo de Utilidade (MU):</strong> Objeto de uso prático, ou parte deste, suscetível de aplicação industrial, que apresente nova forma ou disposição, envolvendo <strong class="font-medium">ato inventivo</strong> (resultar em melhoria funcional no seu uso ou em sua fabricação, não sendo uma simples alteração óbvia). Requisitos: novidade, ato inventivo, aplicação industrial e melhoria funcional.</li>
+                                <li><strong class="font-medium">O que não é patenteável no Brasil:</strong> Descobertas, teorias científicas, métodos matemáticos; concepções puramente abstratas; esquemas comerciais, contábeis, financeiros, publicitários; obras literárias, artísticas (protegidas por direito autoral); programas de computador em si (protegidos por direito autoral e Lei do Software); técnicas cirúrgicas; seres vivos naturais.</li>
+                                <li><strong class="font-medium">Processo de obtenção:</strong> Depósito do pedido no INPI (contendo relatório descritivo, reivindicações, desenhos, resumo), pagamento de taxas, exame formal, publicação (após 18 meses, ou antecipada), período para oposições/solicitar o exame substantivo (até 36 meses do depósito), exame técnico de mérito pelo INPI, e decisão final. Após o deferimento e pagamento da taxa de expedição, é concedida a Carta Patente.</li>
+                                <li><strong class="font-medium">Direitos:</strong> O titular tem o direito de impedir terceiros de, sem seu consentimento, produzir, usar, colocar à venda, vender ou importar produto objeto de patente ou processo ou produto obtido diretamente por processo patenteado.</li>
+                                <li><strong class="font-medium">Duração:</strong> PI - 20 anos contados da data de depósito; MU - 15 anos contados da data de depósito. Não são renováveis.</li>
+                                <li><strong class="font-medium">Segredo Industrial ([GuiaDocente Cap. 4.4], [IntroIP Ch. 5]):</strong> Informação confidencial que confere vantagem competitiva. Protegido enquanto secreto, mas vulnerável à engenharia reversa. A violação pode configurar concorrência desleal.</li>
+                            </ul>
+                           <p class="mb-2"><strong class="font-medium">Desenhos Industriais (DI) ([GuiaDocente Cap. 4.5]):</strong> Protegem a <strong class="font-medium">forma plástica ornamental</strong> de um objeto. <strong class="font-medium">Requisitos:</strong> novidade, originalidade, e servir de tipo para fabricação industrial. <strong class="font-medium">Duração:</strong> 10 anos do depósito, prorrogáveis por mais 3 períodos de 5 anos (total 25 anos).</p>
+                           <p class="mb-2"><strong class="font-medium">Marcas ([GuiaDocente Cap. 4.6], [IntroIP Ch. 4]):</strong> Sinais <strong class="font-medium">visualmente perceptíveis</strong> que <strong class="font-medium">distinguem produtos ou serviços</strong>. <strong class="font-medium">Princípios:</strong> Distintividade, novidade relativa, veracidade, disponibilidade. <strong class="font-medium">Tipos:</strong> de produto/serviço, coletiva, de certificação. <strong class="font-medium">Formas:</strong> nominativa, figurativa, mista, tridimensional. <strong class="font-medium">Duração:</strong> 10 anos da concessão, renováveis indefinidamente.</p>
+                           <p class="mb-2"><strong class="font-medium">Indicações Geográficas (IG) ([GuiaDocente Cap. 4.7]):</strong> Identificam a origem de produtos ou serviços. <strong class="font-medium">Tipos:</strong> Indicação de Procedência (IP - local conhecido) e Denominação de Origem (DO - local cujas características naturais/humanas dão qualidades ao produto). Duração indeterminada.</p>
+                           <p class="mb-2"><strong class="font-medium">Repressão à Concorrência Desleal ([GuiaDocente Cap. 4.8]):</strong> A LPI também prevê crimes de concorrência desleal, atos fraudulentos para desviar clientela alheia.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>C. Proteções Sui Generis</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">Modalidades de proteção intelectual que, por suas características particulares, não se enquadram perfeitamente nas categorias tradicionais de direito autoral ou propriedade industrial, possuindo legislação específica e um regime jurídico "próprio".</p>
+                           <p class="mb-2"><strong class="font-medium">Topografia de Circuitos Integrados (Chips) ([GuiaDocente Cap. 5.1]):</strong> Protegida pela Lei nº 11.484/07, refere-se ao desenho tridimensional das camadas que compõem um circuito integrado. A proteção recai sobre a <strong class="font-medium">originalidade</strong> da topografia. <strong class="font-medium">Registro no INPI. Duração:</strong> 10 anos a partir da data do depósito ou da primeira exploração comercial.</p>
+                           <p class="mb-2"><strong class="font-medium">Proteção de Cultivares (Variedades Vegetais) ([GuiaDocente Cap. 5.2]):</strong> Regulada pela Lei nº 9.456/97, protege novas variedades de plantas que atendam aos requisitos de <strong class="font-medium">novidade</strong>, <strong class="font-medium">distinguibilidade</strong>, <strong class="font-medium">homogeneidade</strong> e <strong class="font-medium">estabilidade</strong>. <strong class="font-medium">Registro no SNPC/MAPA. Duração:</strong> 15 anos (geral) ou 18 anos (árvores/videiras).</p>
+                           <p class="mb-2"><strong class="font-medium">Conhecimentos Tradicionais Associados ao Patrimônio Genético ([GuiaDocente Cap. 5.3]):</strong> Refere-se aos saberes de povos indígenas e comunidades locais sobre recursos genéticos. A Lei nº 13.123/2015 regula o acesso e a <strong class="font-medium">repartição de benefícios</strong>, visando proteger contra a biopirataria.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 3 -->
+            <div id="module3" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 3: O Sistema Brasileiro de Propriedade Intelectual</h2>
+                <p class="mb-6 text-gray-700">Este módulo foca na estrutura legal e institucional da PI no Brasil. Abordaremos as leis mais importantes que regem os direitos de propriedade intelectual no país, o papel central do Instituto Nacional da Propriedade Industrial (INPI) como órgão executor, e como o sistema de PI se integra às políticas de fomento à inovação, essenciais para o desenvolvimento tecnológico e econômico nacional, incluindo o setor espacial.</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Marco Legal da PI no Brasil</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O sistema brasileiro de PI é robusto e fundamentado em diversas legislações ([GuiaDocente Anexo A]):</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Constituição Federal de 1988:</strong> Art. 5º, inciso XXIX, assegura aos autores de inventos industriais privilégio temporário para sua utilização, bem como proteção às criações industriais, à propriedade das marcas, aos nomes de empresas e a outros signos distintivos, tendo em vista o interesse social e o desenvolvimento tecnológico e econômico do País. O inciso XXVII garante aos autores o direito exclusivo de utilização, publicação ou reprodução de suas obras.</li>
+                                <li><strong class="font-medium">Lei da Propriedade Industrial (LPI - Lei nº 9.279/96):</strong> É a principal lei para patentes de invenção e de modelo de utilidade, registros de desenho industrial, marcas, indicações geográficas e repressão à concorrência desleal. Define os requisitos, direitos, prazos e procedimentos.</li>
+                                <li><strong class="font-medium">Lei de Direitos Autorais (LDA - Lei nº 9.610/98):</strong> Regula os direitos de autor e os que lhes são conexos, abrangendo obras literárias, artísticas, científicas e programas de computador (de forma subsidiária).</li>
+                                <li><strong class="font-medium">Lei do Software (Lei nº 9.609/98):</strong> Estabelece o regime específico de proteção da propriedade intelectual de programa de computador e sua comercialização.</li>
+                                <li><strong class="font-medium">Lei de Proteção de Cultivares (LPC - Lei nº 9.456/97):</strong> Institui o sistema de proteção para novas variedades vegetais.</li>
+                                <li><strong class="font-medium">Lei de Topografia de Circuitos Integrados (Lei nº 11.484/07 - Capítulo III):</strong> Dispõe sobre a proteção à propriedade intelectual das topografias de circuitos integrados.</li>
+                                <li><strong class="font-medium">Marco Legal da Biodiversidade (Lei nº 13.123/2015):</strong> Regula o acesso ao patrimônio genético, a proteção e o acesso ao conhecimento tradicional associado e a repartição de benefícios.</li>
+                                <li><strong class="font-medium">Adesão a Tratados Internacionais:</strong> O Brasil é signatário de importantes tratados internacionais, como a Convenção da União de Paris (CUP), a Convenção de Berna, o Acordo TRIPS (OMC), e o Tratado de Cooperação em Matéria de Patentes (PCT), que influenciam e complementam a legislação nacional.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Instituto Nacional da Propriedade Industrial (INPI)</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O INPI ([GuiaDocente Cap. 4.1]) é uma autarquia federal vinculada ao Ministério da Economia (anteriormente MDIC), responsável pela execução, no âmbito nacional, das normas que regulam a Propriedade Industrial. Suas principais atribuições incluem:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>Conceder patentes de invenção e de modelo de utilidade.</li>
+                                <li>Registrar desenhos industriais.</li>
+                                <li>Registrar marcas.</li>
+                                <li>Registrar indicações geográficas.</li>
+                                <li>Registrar programas de computador (software).</li>
+                                <li>Registrar topografias de circuitos integrados.</li>
+                                <li>Averbar contratos de transferência de tecnologia e franquia.</li>
+                                <li>Atuar como escritório receptor e órgão de exame preliminar internacional no âmbito do PCT.</li>
+                                <li>Disseminar informação tecnológica contida em sua base de dados.</li>
+                                <li>Pronunciar-se sobre a conveniência de assinatura, ratificação e denúncia de convenções, tratados, convênios e acordos sobre propriedade industrial.</li>
+                            </ul>
+                            <p class="mt-2">Os processos de registro e concessão no INPI envolvem etapas como depósito do pedido, exame formal, publicação na Revista da Propriedade Industrial (RPI), possibilidade de oposições/manifestações de terceiros, exame técnico substantivo (para patentes, por exemplo) e decisão final. Detalhes específicos variam conforme a modalidade de PI.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                           <span>A Hélice Tríplice e a Inovação na Defesa</span>
+                           <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O modelo da <strong class="font-medium">Hélice Tríplice</strong> (Universidade-Indústria-Governo) é fundamental para entender a dinâmica da inovação, especialmente em setores estratégicos como o de defesa e o aeroespacial. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 6])</p>
+                            <div class="helice-container my-4">
+                                <div class="helice-node"><strong>Governo</strong><p class="text-xs">(Regulador, Financiador, Demandante)</p></div>
+                                <div class="helice-arrows">↔️</div>
+                                <div class="helice-node"><strong>Universidade</strong><p class="text-xs">(Pesquisa Básica, Formação de RH)</p></div>
+                                 <div class="helice-arrows">↔️</div>
+                                <div class="helice-node"><strong>Indústria</strong><p class="text-xs">(Desenvolvimento, Produção, Comercialização)</p></div>
+                            </div>
+                            <p class="mb-2">Neste modelo:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>As <strong class="font-medium">Universidades e ICTs</strong> geram conhecimento e formam pessoal qualificado.</li>
+                                <li>A <strong class="font-medium">Indústria</strong> transforma esse conhecimento em produtos e serviços inovadores, com aplicações práticas e comerciais.</li>
+                                <li>O <strong class="font-medium">Governo</strong> atua como regulador, fomentador (através de políticas e financiamento) e, no caso da defesa, como principal demandante e usuário das tecnologias desenvolvidas.</li>
+                            </ul>
+                            <p class="mt-2">No Brasil, o Ministério da Defesa (MD) tem buscado fortalecer essa interação, por exemplo, através da Política de Propriedade Intelectual do MD (2010), que visa resguardar criações e conhecimentos das Forças Armadas e suas ICTs. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 3]) A Estratégia Nacional de Defesa (END) também enfatiza a capacitação da Base Industrial de Defesa (BID) e o desenvolvimento tecnológico nacional. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 3])</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Contratos de Compensação (Offset) e Transferência de Tecnologia</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">Nas aquisições de grande vulto pela indústria de defesa, especialmente de equipamentos e tecnologias estrangeiras, os <strong class="font-medium">contratos de compensação (offset)</strong> são instrumentos cruciais para promover a <strong class="font-medium">transferência de tecnologia (TT)</strong> e o desenvolvimento da base industrial de defesa nacional. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 6-7])</p>
+                           <p class="mb-2">A política de offset do MD (criada em 2002) exige que, em importações de bens e serviços de defesa, haja compensações comerciais, industriais e, fundamentalmente, tecnológicas. O objetivo é:</p>
+                            <div class="flow-container my-4">
+                                <div class="flow-item">Aquisição de Tecnologia Estrangeira de Defesa</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item">Acordo de <strong class="text-accent">Offset</strong> (Compensação Comercial, Industrial e Tecnológica)</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item">Processo de <strong class="text-accent">Transferência de Tecnologia</strong> (TT) para Empresas/ICTs Brasileiras<br><span class="text-xs">(Licenciamento de PI, Fornecimento de Tecnologia, Know-how, Capacitação de Pessoal)</span></div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item">Absorção e Desenvolvimento da Tecnologia pela Indústria Nacional</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item">Fortalecimento da <strong class="text-accent">Base Industrial de Defesa (BID)</strong> e Inovação</div>
+                                 <div class="flow-connector">⬇️</div>
+                                <div class="flow-item">Aumento da Autonomia Tecnológica Nacional e Competitividade</div>
+                            </div>
+                           <p class="mt-2">A TT nesses contratos envolve a cessão de direitos sobre PI (licenciamento de patentes, know-how) ou o fornecimento direto de tecnologia, visando capacitar a indústria nacional a entender, reproduzir e inovar. A gestão da PI é vital nesses acordos. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p.7])</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Enforcement de Direitos de PI no Brasil</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">A proteção conferida pelos direitos de PI só é efetiva se houver mecanismos para coibir sua violação (infração ou contrafação). No Brasil, a defesa dos direitos de PI pode ocorrer nas esferas:</p>
+                           <ul class="list-disc pl-5 space-y-1">
+                               <li><strong class="font-medium">Cível:</strong> O titular do direito pode ingressar com ações judiciais para cessar a violação (ex: ação de abstenção de uso, busca e apreensão de produtos contrafeitos) e para obter reparação por perdas e danos (danos emergentes, lucros cessantes, danos morais). Muitas vezes, é possível obter liminares para impedir a continuidade da infração enquanto o processo tramita. ([IntroIP Ch. 2])</li>
+                               <li><strong class="font-medium">Criminal:</strong> Várias leis de PI tipificam condutas infratoras como crimes, sujeitando os infratores a penas de detenção ou reclusão, além de multa. Exemplos incluem a violação de direito autoral (Art. 184 do Código Penal), crimes contra patentes (Art. 183-186 LPI), crimes contra desenhos industriais (Art. 187-188 LPI), crimes contra marcas (Art. 189-190 LPI) e crimes de concorrência desleal (Art. 195 LPI). A ação penal geralmente depende de queixa do ofendido, mas em alguns casos (como violação de direito autoral com intuito de lucro direto ou indireto) pode ser pública. ([GuiaDocente, seções de penalidades])</li>
+                               <li><strong class="font-medium">Administrativa:</strong> Em certos casos, órgãos administrativos como a Receita Federal (alfândega) podem atuar na apreensão de produtos contrafeitos na importação/exportação. O próprio INPI pode declarar a nulidade administrativa de patentes e registros.</li>
+                           </ul>
+                           <p class="mt-2">A existência de registros e patentes concedidas pelo INPI, bem como de registros de obras autorais, é fundamental para facilitar a comprovação da titularidade e a defesa dos direitos em caso de litígio.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Fomento à Inovação e PI no Brasil</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O Brasil tem buscado fortalecer seu ambiente de inovação através de diversas políticas e instrumentos legais que, direta ou indiretamente, se conectam com o sistema de Propriedade Intelectual. ([GuiaDocente Anexo B])</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Lei de Inovação (Lei nº 10.973/2004, atualizada pela Lei nº 13.243/2016 - Novo Marco Legal de CT&I):</strong> Busca estimular a inovação e a pesquisa científica e tecnológica no ambiente produtivo. Prevê a criação de Núcleos de Inovação Tecnológica (NITs) em Instituições Científicas, Tecnológicas e de Inovação (ICTs), o compartilhamento de laboratórios, a participação de pesquisadores em projetos de inovação, e a transferência de tecnologia do setor público para o privado. A gestão da PI (patenteamento de resultados de pesquisa, licenciamento) é um componente chave desta lei.</li>
+                                <li><strong class="font-medium">Lei do Bem (Lei nº 11.196/2005):</strong> Concede incentivos fiscais (deduções de imposto de renda e contribuição social sobre o lucro líquido) para empresas que realizam pesquisa e desenvolvimento de inovação tecnológica. Despesas com PI (depósito de patentes, marcas) podem ser consideradas P&D.</li>
+                                <li><strong class="font-medium">Políticas Industriais e de CT&I:</strong> Planos e programas governamentais (como o Plano de Ação em CT&I e a Política de Desenvolvimento Produtivo, mencionados no [GuiaDocente Anexo B]) frequentemente incluem a PI como um eixo estratégico para aumentar a competitividade de setores específicos, incluindo o aeroespacial. A Estratégia Nacional de Defesa (END) e a Política Nacional da Indústria de Defesa (PNID) também são cruciais para o fomento no setor. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 3-4])</li>
+                                <li><strong class="font-medium">Fomento por Agências:</strong> Agências como FINEP, BNDES e CNPq oferecem linhas de financiamento e bolsas que podem apoiar projetos inovadores com potencial de geração de PI.</li>
+                            </ul>
+                            <p class="mt-2">A PI é, portanto, não apenas um mecanismo de proteção, mas uma ferramenta estratégica para que os frutos da inovação fomentada por essas políticas possam ser apropriados, valorizados e transformados em desenvolvimento econômico e social.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo 4 -->
+            <div id="module4" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 4: A Indústria Espacial: Tecnologias e Tendências Globais</h2>
+                <p class="mb-6 text-gray-700">Este módulo oferece uma imersão no dinâmico setor espacial, traçando sua evolução desde os primórdios até o cenário atual. Exploraremos a importância crítica do espaço para a comunicação global, pesquisa científica e desenvolvimento econômico. Analisaremos as megatendências tecnológicas que estão redefinindo a indústria: Sustentabilidade, Digitalização e Automação/Circularidade, com foco em como essas tendências impulsionam a inovação e a busca por novas soluções protegíveis por PI.</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Visão Geral do Transporte e da Indústria Espacial</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O transporte espacial envolve o movimento de pessoas, cargas e satélites para além da atmosfera terrestre, utilizando principalmente foguetes e espaçonaves. Este setor é vital, pois permite o lançamento e manutenção de satélites para telecomunicações, observação da Terra, navegação (GPS), previsão do tempo, além de apoiar a exploração científica do universo e, mais recentemente, o turismo espacial. ([WIPOSpace p. 4])</p>
+                            <p class="mb-2">A indústria espacial é um ecossistema complexo que inclui fabricantes de satélites e lançadores, operadores de satélites, fornecedores de componentes, empresas de serviços de lançamento, estações terrestres, e um número crescente de empresas focadas em aplicações de dados espaciais (o chamado "downstream"). Projeções indicam um aumento exponencial no número de satélites em órbita, impulsionado pela demanda por conectividade global e novas aplicações. ([WIPOSpace p. 4], [42426-Texto do Artigo... p. 2])</p>
+                            <p class="mb-2">O setor de satélites, em particular os nanossatélites como CubeSats, tem apresentado crescimento exponencial, impulsionado por custos reduzidos e novas aplicações em redes e constelações. Empresas como Rocket Lab estão desenvolvendo lançadores menores para atender a essa demanda. ([42426-Texto do Artigo... p. 2])</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Megatendências Tecnológicas no Setor Espacial</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2"><strong class="font-medium">Sustentabilidade ([WIPOSpace p. 5, 27-34]):</strong> Há um foco crescente na redução do impacto ambiental das atividades espaciais.</p>
+                            <ul class="list-disc pl-5 mb-2 space-y-1">
+                                <li><strong class="font-medium">Propulsão Sustentável:</strong> Desenvolvimento de foguetes com menor emissão de CO2, como foguetes híbridos, uso de biocombustíveis, propulsão elétrica para manobras orbitais (mais eficiente em termos de propelente) e foguetes movidos a hidrogênio (que produzem apenas vapor d'água como subproduto). Essas inovações são campos férteis para patentes.</li>
+                                <li><strong class="font-medium">Gerenciamento de Detritos Espaciais:</strong> Tecnologias para mitigar, remover e reciclar detritos espaciais, visando a sustentabilidade a longo prazo das órbitas terrestres.</li>
+                            </ul>
+                             <div class="bg-white p-4 rounded-lg border my-4">
+                                <h4 class="font-semibold text-md mb-2 text-center text-accent">Desenvolvimento de Patentes em Propulsão Sustentável</h4>
+                                <div class="small-chart-container">
+                                    <canvas id="sustainablePropulsionChart"></canvas>
+                                </div>
+                                <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D16.</p>
+                            </div>
+
+                            <p class="mb-2"><strong class="font-medium">Digitalização ([WIPOSpace p. 5-6, 41-49]):</strong> A transformação digital está otimizando operações, aumentando a segurança e permitindo novas capacidades.</p>
+                            <ul class="list-disc pl-5 mb-2 space-y-1">
+                                <li><strong class="font-medium">Comunicação e Segurança:</strong> Sistemas avançados de controle de missão com IA para otimizar planejamento e execução; comunicação D2D (dispositivo-a-dispositivo) entre satélites e com solo; uso de computação em nuvem para processamento de grandes volumes de dados espaciais; desenvolvimento de internet de baixa latência via constelações de satélites (LEO); e robustas medidas de cibersegurança para proteger redes espaciais. Muitas dessas áreas envolvem patentes de software e hardware.</li>
+                                <li><strong class="font-medium">Interface Homem-Máquina (HMI) ([WIPOSpace p. 6-7, 50-56]):</strong> Tecnologias como Realidade Estendida (XR - VR, AR, MR) para treinamento de astronautas, manutenção e planejamento de missões; sistemas de reconhecimento de voz e facial para controle e segurança; e head-up displays (HUDs) para fornecer informações críticas aos astronautas de forma intuitiva.</li>
+                            </ul>
+                            <div class="grid md:grid-cols-2 gap-4 my-4">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center text-accent">Patentes em Comunicação & Segurança</h4>
+                                    <div class="small-chart-container">
+                                        <canvas id="commsSecurityChart"></canvas>
+                                    </div>
+                                    <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D34.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center text-accent">Patentes em Interface Homem-Máquina</h4>
+                                    <div class="small-chart-container">
+                                        <canvas id="hmiChart"></canvas>
+                                    </div>
+                                     <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D43.</p>
+                                </div>
+                            </div>
+
+                            <p class="mb-2"><strong class="font-medium">Automação e Circularidade ([WIPOSpace p. 5-6, 34-40]):</strong> Visa a eficiência de recursos e operações autônomas.</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Uso Eficiente de Materiais:</strong> Adoção de materiais leves e avançados, design para desmontagem e reciclagem.</li>
+                                <li><strong class="font-medium">Produção Inteligente e Robótica:</strong> Automação de linhas de produção de componentes espaciais (Indústria 4.0), uso de robótica para montagem, manutenção em órbita e exploração planetária.</li>
+                                <li><strong class="font-medium">Reciclagem no Espaço (In-Situ Resource Utilization - ISRU):</strong> Tecnologias para utilizar recursos locais (ex: regolito lunar para construção) e reciclar componentes de missões, reduzindo a dependência de suprimentos da Terra.</li>
+                            </ul>
+                             <div class="bg-white p-4 rounded-lg border my-4">
+                                <h4 class="font-semibold text-md mb-2 text-center text-accent">Patentes em Automação e Circularidade</h4>
+                                <div class="small-chart-container">
+                                    <canvas id="automationCircularityChart"></canvas>
+                                </div>
+                                <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D25.</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Tecnologias Emergentes Chave e sua PI</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2"><strong class="font-medium">Manufatura Aditiva (Impressão 3D) no Espaço ([WIPOSpace p. 57-62]):</strong></p>
+                           <ul class="list-disc pl-5 mb-2 space-y-1">
+                               <li><strong class="font-medium">Vantagens:</strong> Produção sob demanda de ferramentas, peças de reposição e até estruturas maiores diretamente no espaço, reduzindo custos de lançamento, massa e volume de carga, e aumentando a autonomia de missões de longa duração.</li>
+                               <li><strong class="font-medium">Tipos e Materiais:</strong> Impressão com polímeros, metais e até regolito lunar/marciano. Bioprinting para aplicações médicas futuras.</li>
+                               <li><strong class="font-medium">Desafios e PI:</strong> Garantir a qualidade e confiabilidade dos materiais impressos em ambiente de microgravidade e vácuo; desenvolvimento de novos processos e materiais específicos para o espaço (altamente patenteáveis); proteção de designs de peças e dos próprios processos de impressão 3D adaptados ao espaço.</li>
+                           </ul>
+                            <div class="grid md:grid-cols-2 gap-4 my-4">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center text-accent">Publicações Científicas em MA no Espaço</h4>
+                                    <div class="small-chart-container">
+                                        <canvas id="amPublicationsChart"></canvas>
+                                    </div>
+                                     <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D52.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center text-accent">Patentes em MA no Espaço</h4>
+                                    <div class="small-chart-container">
+                                        <canvas id="amPatentsChart"></canvas>
+                                    </div>
+                                     <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D54.</p>
+                                </div>
+                            </div>
+                           <p class="mb-2"><strong class="font-medium">Blockchain em Comunicações por Satélite ([WIPOSpace p. 63-68], [wang2022blockchain.pdf], [aerospace-09-00495-v2.pdf], WIPO Webpage on Blockchain):</strong></p>
+                           <ul class="list-disc pl-5 space-y-1">
+                               <li><strong class="font-medium">Relevância:</strong> Aumento da segurança, eficiência e rastreabilidade na gestão de redes de satélites, especialmente constelações. Prevenção de hacking e manipulação de dados. Blockchain oferece um ledger descentralizado, imutável e transparente. ([WIPOSpace p.63], [wang2022blockchain.pdf Abstract]).</li>
+                               <li><strong class="font-medium">Aplicações e Protocolos:</strong>
+                                   <ul class="list-circle pl-4">
+                                       <li>Satélites como nós na rede blockchain, validadores de transações, uso de smart contracts para automatizar operações. ([WIPOSpace p.64])</li>
+                                       <li><strong class="text-accent">Space Digital Tokens (SDT)</strong> e protocolo <strong class="text-accent">Proof of Space Transactions (PoST)</strong> para autenticar comunicações entre satélites. ([aerospace-09-00495-v2.pdf p.1, 4-5])</li>
+                                       <li>Aplicações em Redes Integradas Espaço-Ar-Solo (SAG-IoT) para gerenciamento de recursos, proveniência de dados e comunicações seguras. ([wang2022blockchain.pdf Abstract, p.5])</li>
+                                  </ul>
+                               </li>
+                               <li><strong class="font-medium">Desafios e PI:</strong> Limitações computacionais, latência ([Latency_and_Performance_Analyses...pdf]), escalabilidade. Inovações em algoritmos de consenso (ex: PoA), protocolos de comunicação seguros e arquiteturas de rede descentralizadas para satélites são patenteáveis. ([WIPOSpace p.64], [wang2022blockchain.pdf p.11-13])</li>
+                           </ul>
+                             <div class="grid md:grid-cols-2 gap-4 my-4">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center text-accent">Publicações Científicas em Blockchain Espacial</h4>
+                                    <div class="small-chart-container">
+                                        <canvas id="blockchainPublicationsChart"></canvas>
+                                    </div>
+                                     <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D56.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center text-accent">Patentes em Blockchain Espacial</h4>
+                                    <div class="small-chart-container">
+                                        <canvas id="blockchainPatentsChart"></canvas>
+                                    </div>
+                                     <p class="text-xs text-center mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace Fig. D58.</p>
+                                </div>
+                            </div>
+                             <p class="mb-2"><strong class="font-medium">Computação Aérea (Aerial Computing) ([Aerial_Computing_A_New_Computing_Paradigm_Applicat.pdf]):</strong></p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Conceito:</strong> Amalgamação de redes de acesso aéreo (LAPs, HAPs, satélites LEO) e computação de borda para oferecer serviços de computação globais, com alta mobilidade e escalabilidade.</li>
+                                <li><strong class="font-medium">Arquitetura:</strong> Plataformas de computação de baixa altitude (LAC), alta altitude (HAC) e satélites, complementando sistemas terrestres.</li>
+                                <li><strong class="font-medium">PI:</strong> Inovações em gerenciamento de recursos, eficiência energética para plataformas aéreas, técnicas de multi-acesso, IA para otimização de rede e trajetória, e segurança em ambientes computacionais distribuídos e móveis.</li>
+                            </ul>
+                           <p class="mt-2"><strong class="font-medium">Produto Dual ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 5]):</strong> Tecnologias desenvolvidas para fins de defesa frequentemente têm aplicações civis (uso dual). Por exemplo, GPS, internet, materiais compósitos. A PI gerada no setor de defesa pode ser licenciada para o mercado civil, gerando novas receitas e impulsionando a inovação em outros setores.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 5 -->
+            <div id="module5" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 5: Propriedade Intelectual no Setor Espacial Global</h2>
+                <p class="mb-6 text-gray-700">Este módulo conecta a PI diretamente ao setor espacial, analisando como patentes e outros direitos são usados estrategicamente em escala global. Veremos quem são os líderes em inovação e quais tecnologias estão no centro das disputas por proteção intelectual, com base nos dados do relatório da OMPI sobre o futuro do transporte espacial.</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>O Papel Estratégico da PI no Setor Espacial</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">No setor espacial, caracterizado por altos investimentos em P&D e ciclos longos de desenvolvimento, a PI, especialmente as <strong class="font-medium">patentes</strong>, desempenha um papel crucial ([WIPOSpace p. 8], [IntroIP Ch. 1.1]):</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Incentivo à Inovação:</strong> A possibilidade de obter direitos exclusivos sobre uma nova tecnologia espacial motiva empresas e instituições a investir em pesquisa e desenvolvimento de fronteira.</li>
+                                <li><strong class="font-medium">Retorno sobre Investimento:</strong> Patentes permitem que os inovadores explorem comercialmente suas invenções, seja através da produção própria ou do licenciamento para terceiros, recuperando os altos custos de P&D.</li>
+                                <li><strong class="font-medium">Disseminação Tecnológica:</strong> A exigência de descrição detalhada nos pedidos de patente contribui para o acervo de conhecimento técnico, permitindo que a comunidade científica e industrial aprenda e construa sobre as inovações existentes (após a expiração da patente ou mediante licença).</li>
+                                <li><strong class="font-medium">Atração de Investimentos:</strong> Um portfólio de PI robusto pode ser um fator decisivo para atrair investimentos, formar parcerias estratégicas e aumentar o valor de mercado de uma empresa espacial.</li>
+                                <li><strong class="font-medium">Barreira de Entrada e Vantagem Competitiva:</strong> Direitos de PI podem criar barreiras para concorrentes e garantir uma posição de destaque no mercado.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Tendências Globais de Patenteamento em Tecnologias Espaciais</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O relatório da OMPI ([WIPOSpace p. 8-12]) revela um dinamismo intenso no patenteamento de tecnologias espaciais:</p>
+                            <ul class="list-disc pl-5 mb-3 space-y-1">
+                                <li><strong class="font-medium">Crescimento Acelerado:</strong> Após um período de estagnação nos anos 2000, houve um aumento de seis vezes no número de famílias de patentes publicadas entre 2011 e 2023, passando de cerca de 1.400 para quase 9.000 anuais. Isso representa uma taxa de crescimento anual composta (CAGR) de aproximadamente 15% entre 2010 e 2023.</li>
+                                <li><strong class="font-medium">Foco Tecnológico:</strong> A grande maioria dos esforços de pesquisa e patenteamento está concentrada em <strong class="font-medium">Comunicação e Segurança</strong>. No entanto, tecnologias de <strong class="font-medium">Automação e Circularidade</strong> têm demonstrado o maior crescimento relativo (CAGR de 15% entre 2000-2023), indicando uma área emergente de grande interesse. Patenteamento em Propulsão Sustentável e Interface Homem-Máquina também mostram crescimento constante. ([WIPOSpace p. 10])</li>
+                                <li><strong class="font-medium">Principais Escritórios de Depósito:</strong> A China lidera como o principal destino para pedidos de patente no setor espacial (mais de 43.600 famílias de patentes entre 2000-2023), seguida pelos Estados Unidos (cerca de 24.600). O sistema internacional PCT (OMPI) e o Escritório Europeu de Patentes (EPO) também são vias importantes para a proteção. ([WIPOSpace p. 11-12])</li>
+                            </ul>
+                            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                                <h3 class="font-semibold text-lg mb-2 text-center">Crescimento de Patentes em Tecnologias Espaciais (2000-2023)</h3>
+                                <div class="chart-container">
+                                    <canvas id="patentTrendChart"></canvas>
+                                </div>
+                                <p class="text-center text-sm mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace p. 8.</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Principais Atores Globais no Cenário de Patentes Espaciais</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-3"><strong class="font-medium">Países Líderes em Invenção ([WIPOSpace p. 13-18]):</strong> A Ásia é a região predominante, com inventores chineses liderando em volume de publicações de famílias de patentes (mais de 38.000 desde 2000), ultrapassando os EUA em 2012. Os Estados Unidos seguem como um forte polo de invenção (quase 17.000). Japão, República da Coreia, França e Alemanha também são atores importantes. Países como Índia, Dinamarca e Finlândia mostram taxas de crescimento dinâmicas recentes. O Brasil figura com 1.423 famílias de patentes depositadas entre 2000-2023 ([WIPOSpace p.12]), indicando atividade, mas com espaço para crescimento em invenção local.</p>
+                           <div class="grid md:grid-cols-2 gap-6 mb-4">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center">Top Países Inventores (Nº Famílias de Patentes, 2000-2023)</h4>
+                                     <div class="chart-container h-80">
+                                        <canvas id="countryChart"></canvas>
+                                    </div>
+                                    <p class="text-center text-sm mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace p. 14.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center">Top Titulares de Patentes (Nº Famílias de Patentes, 2000-2023)</h4>
+                                     <div class="chart-container h-80">
+                                        <canvas id="ownerChart"></canvas>
+                                    </div>
+                                     <p class="text-center text-sm mt-2 text-gray-500">Fonte: Adaptado de WIPOSpace p. 23.</p>
+                                </div>
+                            </div>
+                           <p class="mb-2"><strong class="font-medium">Principais Titulares de Patentes (Empresas e Instituições) ([WIPOSpace p. 22-26]):</strong> A Academia Chinesa de Ciências (CAS) e a China Aerospace Science and Technology Corporation (CASC) lideram em número de famílias de patentes. Entre as empresas ocidentais, destacam-se Boeing (EUA), Mitsubishi Electric (Japão) e Airbus (Europa). Universidades chinesas como Beihang University e Harbin Institute of Technology também são prolíficas. Gigantes de tecnologia como Qualcomm, Huawei e Alphabet (Google) mostram crescente atividade patentária no setor.</p>
+                           <p class="mb-2"><strong class="font-medium">O Caso SpaceX e Segredos Industriais ([WIPOSpace p. 23]):</strong> Curiosamente, a SpaceX, uma das empresas mais inovadoras do setor, possui um número relativamente baixo de patentes registradas, preferindo proteger muitas de suas tecnologias chave (especialmente em propulsão de foguetes) como <strong class="font-medium">segredos industriais</strong>. A justificativa de Elon Musk é evitar que concorrentes utilizem suas patentes publicadas como "livros de receita". Essa estratégia, embora arriscada (segredos podem vazar ou ser descobertos independentemente), destaca que patentes não são a única forma de proteger inovações no setor espacial.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>PI em Tecnologias Espaciais Específicas</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O relatório da OMPI ([WIPOSpace p. 27-68]) detalha a atividade de patenteamento nas quatro megatendências:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Propulsão Sustentável:</strong> Maior atividade em <strong class="font-medium">propulsão elétrica</strong> (eficiente para manobras orbitais) e <strong class="font-medium">baterias</strong> avançadas para aplicações espaciais. China e EUA lideram. Boeing e Airbus são titulares importantes.</li>
+                                <li><strong class="font-medium">Automação e Circularidade:</strong> Domínio de patentes em <strong class="font-medium">produção inteligente</strong> (robótica e automação para fabricação e operações). China lidera em volume, mas EUA e Canadá mostram alta especialização (RSI). CASC (China), Boeing e Airbus são ativos.</li>
+                                <li><strong class="font-medium">Comunicação e Segurança:</strong> É a área com maior volume de patentes, especialmente em <strong class="font-medium">comunicação de baixa latência</strong> e <strong class="font-medium">navegação</strong>. China e EUA lideram. CAS, CASC e Boeing são os principais depositantes. Qualcomm se destaca em comunicação D2D.</li>
+                                <li><strong class="font-medium">Interface Homem-Máquina (HMI):</strong> Crescimento em tecnologias de <strong class="font-medium">VR/AR/XR e Metaverso</strong> para aplicações espaciais. EUA lideram em publicações nesta área. Alphabet (Google) e Sony são titulares notáveis.</li>
+                                <li><strong class="font-medium">Tecnologias Emergentes:</strong> <strong class="font-medium">Manufatura Aditiva no Espaço</strong> tem visto um aumento nas publicações científicas e patentes, com EUA e China liderando. <strong class="font-medium">Blockchain para Comunicações por Satélite</strong> também é uma área crescente, dominada pela China em termos de patentes. ([WIPOSpace p. 57-68])</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo 6 -->
+            <div id="module6" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 6: Propriedade Intelectual e a Indústria Espacial Brasileira</h2>
+                <p class="mb-6 text-gray-700">Este módulo volta o foco para o Brasil, analisando como as diversas modalidades de Propriedade Intelectual se aplicam às atividades e inovações da indústria espacial nacional. Discutiremos os principais atores, os desafios enfrentados e as vastas oportunidades para que a PI impulsione a competitividade e o desenvolvimento tecnológico do setor espacial brasileiro.</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Panorama da Indústria e Programa Espacial Brasileiro</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O Programa Espacial Brasileiro (PEB) é coordenado pela Agência Espacial Brasileira (AEB) e executado por diversas instituições, com destaque para o Instituto Nacional de Pesquisas Espaciais (INPE), responsável pelo desenvolvimento de satélites e aplicações, e o Departamento de Ciência e Tecnologia Aeroespacial (DCTA), com seu Instituto de Aeronáutica e Espaço (IAE), focado em veículos lançadores e tecnologias de acesso ao espaço. O Centro de Lançamento de Alcântara (CLA) é um ativo estratégico. Além das entidades governamentais, há uma crescente participação de empresas privadas, incluindo startups (SpaceTechs), na cadeia produtiva e de serviços espaciais. A indústria de defesa brasileira também desempenha um papel relevante, com empresas como a Embraer tendo um histórico de inovação e patentes no setor aeroespacial ([42426-Texto do Artigo... p.10]).</p>
+                            <p class="mb-2">Áreas de foco incluem o desenvolvimento de satélites de observação da Terra (como a série CBERS em parceria com a China e o Amazônia-1, totalmente nacional), satélites de comunicação (SGDC), veículos lançadores (VLS, VLM), e pesquisa em ciências espaciais e atmosféricas. A indústria fornece componentes, subsistemas e serviços para essas missões. A Estratégia Nacional de Defesa e as Estratégias Nacionais de C,T&I têm historicamente destacado o setor aeroespacial como prioritário ([42426-Texto do Artigo... p.3]).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Aplicação das Modalidades de PI às Atividades Espaciais Brasileiras</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                             <p class="mb-2">Todas as modalidades de PI são relevantes para o setor espacial brasileiro:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Patentes:</strong> Essenciais para proteger inovações em novos materiais para foguetes, algoritmos de controle de atitude de satélites, sistemas de propulsão, sensores embarcados, métodos de teste de componentes espaciais, arquiteturas de satélites, tecnologias de antenas, processos de fabricação de painéis solares espaciais. Por exemplo, o INPE e o IAE possuem diversas tecnologias patenteáveis resultantes de seus projetos.</li>
+                                <li><strong class="font-medium">Direito Autoral (incluindo Software):</strong> Protege o código de software de controle de solo para missões, software embarcado em satélites para processamento de dados e controle, algoritmos de navegação e guiagem, simuladores de voo espacial, manuais técnicos, documentação de projetos, artigos científicos e teses resultantes de pesquisas espaciais. O registro de software no INPI é uma prática recomendada para softwares críticos desenvolvidos no Brasil.</li>
+                                <li><strong class="font-medium">Marcas:</strong> Utilizadas para identificar e distinguir empresas (ex: AEB, INPE, Visiona, Alcântara Cyclone Space), nomes de programas espaciais, missões (ex: Missão Amazônia), satélites (ex: Amazônia-1, CBERS), serviços de lançamento, ou plataformas de dados de observação da Terra. Uma marca forte agrega valor e reconhecimento.</li>
+                                <li><strong class="font-medium">Desenhos Industriais:</strong> Podem proteger o design ornamental de componentes de satélites (ex: formato de uma antena específica, configuração de painéis solares), carenagens de foguetes, interfaces de equipamentos de solo, ou até mesmo o design de uniformes de astronautas ou técnicos.</li>
+                                <li><strong class="font-medium">Segredos Industriais:</strong> Cruciais para proteger know-how específico em processos de fabricação de propelentes, técnicas de montagem e integração de satélites, algoritmos proprietários não patenteados, ou dados de teste confidenciais.</li>
+                                <li><strong class="font-medium">Indicações Geográficas:</strong> Embora menos comum, poderia ser relevante se, por exemplo, o Centro de Lançamento de Alcântara desenvolvesse serviços de lançamento com características únicas e reputação vinculadas à sua localização geográfica privilegiada.</li>
+                                <li><strong class="font-medium">Topografias de Circuitos Integrados:</strong> Aplicável a chips e microeletrônica desenvolvidos especificamente para aplicações espaciais por instituições ou empresas brasileiras, como os utilizados em sistemas embarcados de satélites.</li>
+                                <li><strong class="font-medium">Conhecimentos Tradicionais e Patrimônio Genético ([GuiaDocente Cap. 5.3]):</strong> Se a P&D espacial brasileira envolver, por exemplo, o estudo de plantas nativas para desenvolvimento de biocombustíveis para foguetes ou materiais com propriedades únicas para uso no espaço, as regras de acesso e repartição de benefícios do Marco da Biodiversidade seriam aplicáveis.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Atividade Patentária Brasileira no Setor Espacial</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O artigo "Mapeamento Patentário Sobre as Tecnologias Aeroespaciais..." ([42426-Texto do Artigo...]) fornece um retrato da atividade de patenteamento no Brasil. Entre os 124 documentos patentários relevantes analisados (depositados no Brasil):</p>
+                            <div class="grid md:grid-cols-2 gap-6 my-4">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center">Depósitos por Tipo de Instituição</h4>
+                                    <div class="pie-chart-container">
+                                        <canvas id="brazilDepositorsPieChart"></canvas>
+                                    </div>
+                                    <p class="text-xs text-center mt-2">62% por Indústrias de Interesse da Defesa e 38% por Instituições de Ensino e Pesquisa.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h4 class="font-semibold text-md mb-2 text-center">Principais Tecnologias Patenteadas</h4>
+                                     <div class="chart-container h-80">
+                                        <canvas id="brazilTechBarChart"></canvas>
+                                    </div>
+                                    <p class="text-xs text-center mt-2">45% Métodos e Sistemas; 36% Veículo Cosmonáutico, Satélites e Peças.</p>
+                                </div>
+                            </div>
+                           <p class="mb-2">A Embraer é a principal depositante industrial (46% do total), seguida pela USP (16%) entre as instituições de ensino. As Indústrias de Interesse da Defesa focam mais em produtos (veículos, satélites), enquanto as Instituições de Ensino e Pesquisa tendem a patentear processos e métodos complementares. ([42426-Texto do Artigo... p.7-10])</p>
+                           <p class="mb-2">O INPI ([GuiaDocente Cap. 4.1]) tem o papel de examinar esses pedidos e disponibilizar informações tecnológicas.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Desafios e Oportunidades da PI para o Setor Espacial Brasileiro</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2"><strong class="font-medium">Desafios:</strong></p>
+                            <ul class="list-disc pl-5 mb-2 space-y-1">
+                                <li><strong class="font-medium">Cultura de PI:</strong> Aumentar a conscientização sobre a importância estratégica da PI. ([42426-Texto do Artigo... p.5])</li>
+                                <li><strong class="font-medium">Investimento em P&D e Patenteamento:</strong> Volume ainda modesto comparado às potências espaciais.</li>
+                                <li><strong class="font-medium">Custos e Complexidade:</strong> O processo de obtenção e manutenção de patentes pode ser um desafio.</li>
+                                <li><strong class="font-medium">Transferência de Tecnologia:</strong> Facilitar a TT de universidades/institutos para a indústria. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p.7])</li>
+                            </ul>
+                             <p class="mb-2"><strong class="font-medium">Oportunidades:</strong></p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Desenvolvimento de Nichos Tecnológicos:</strong> Focar em áreas com vantagens comparativas.</li>
+                                <li><strong class="font-medium">Fomento a SpaceTechs:</strong> PI é crucial para startups atraírem investimento. A AEB tem buscado fomentar este setor. ([42426-Texto do Artigo... p.3-4])</li>
+                                <li><strong class="font-medium">Colaborações Internacionais Estratégicas:</strong> Utilizar a PI como base para parcerias.</li>
+                                <li><strong class="font-medium">Inteligência Competitiva com Patentes:</strong> Usar bancos de dados para direcionar P&D. ([GuiaDocente Cap. 4.4])</li>
+                                <li><strong class="font-medium">Políticas de Incentivo ([GuiaDocente Anexo B]):</strong> Aproveitar leis de inovação e programas de fomento.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo 7 -->
+            <div id="module7" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 7: Gestão Estratégica da PI para o Setor Espacial Brasileiro</h2>
+                 <p class="mb-6 text-gray-700">A simples obtenção de direitos de PI não é suficiente; é crucial uma gestão estratégica para maximizar seu valor. Este módulo aborda como alinhar a PI com os objetivos de negócio e P&D no setor espacial, desde o mapeamento de ativos intelectuais, passando por análises de liberdade de operação, até mecanismos de licenciamento, transferência de tecnologia e o uso de informações de patentes para inteligência competitiva e tomada de decisão.</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Desenvolvimento de uma Estratégia de PI</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">Uma estratégia de PI eficaz deve estar integrada ao planejamento estratégico da organização espacial (empresa, ICT, agência governamental). Passos chave incluem:</p>
+                             <div class="flow-container my-4">
+                                <div class="flow-item"><strong>1. Auditoria de PI:</strong> Identificar ativos existentes e potenciais.</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item"><strong>2. Alinhamento com Objetivos:</strong> Definir como a PI apoiará metas de negócio/P&D.</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item"><strong>3. Análise Competitiva:</strong> Mapear cenário de PI de concorrentes.</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item"><strong>4. Decisões de Proteção:</strong> O quê, como e onde proteger cada ativo.</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item"><strong>5. Políticas Internas de PI:</strong> Definir procedimentos, titularidade e recompensas.</div>
+                                <div class="flow-connector">⬇️</div>
+                                <div class="flow-item"><strong>6. Orçamento e Recursos:</strong> Alocar verbas para atividades de PI.</div>
+                            </div>
+                            <p>A política de PI do Ministério da Defesa, por exemplo, visa resguardar criações no âmbito das ICTs das Forças Armadas. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p. 3])</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Buscas de Anterioridade e Análise de Liberdade de Operação (FTO)</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2"><strong class="font-medium">Buscas de Anterioridade (Estado da Técnica) ([GuiaDocente Cap. 4.4]):</strong> Antes de investir pesadamente em P&D ou depositar um pedido de patente, é crucial realizar buscas em bancos de patentes e literatura técnica para verificar se a invenção é realmente nova e possui atividade inventiva. Isso evita gastos desnecessários com pedidos que seriam indeferidos e pode revelar soluções existentes ou direcionar a pesquisa para caminhos mais promissores.</p>
+                            <p class="mb-2"><strong class="font-medium">Análise de Liberdade de Operação (FTO - Freedom to Operate):</strong> Consiste em verificar se a exploração comercial de um novo produto ou processo no Brasil (ou em outro país de interesse) pode infringir direitos de PI de terceiros (principalmente patentes) já existentes e válidos naquele território. Uma análise FTO negativa pode indicar a necessidade de:
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Modificar o produto/processo para contornar as patentes de terceiros ("design around").</li>
+                                    <li>Tentar obter uma licença do titular da patente.</li>
+                                    <li>Contestar a validade da patente de terceiro (ex: via processo de nulidade no INPI ou judicialmente).</li>
+                                    <li>Adiar ou cancelar o lançamento do produto/processo naquele mercado.</li>
+                                </ul>
+                            Ambas as análises são fundamentais para mitigar riscos legais e tomar decisões estratégicas informadas no desenvolvimento e lançamento de tecnologias espaciais.
+                            </p>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Licenciamento e Transferência de Tecnologia no Setor Espacial</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">A PI é a base para acordos de licenciamento e transferência de tecnologia (TT), que são vitais no setor espacial devido à alta complexidade e custos. A TT é o "processo de transferência de conhecimento tecnológico caracterizado pela cessão de direitos sobre criação" ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p.7]). Estes mecanismos permitem:</p>
+                           <ul class="list-disc pl-5 mb-2 space-y-1">
+                                <li><strong class="font-medium">In-licensing:</strong> Adquirir o direito de usar tecnologias patenteadas por terceiros.</li>
+                                <li><strong class="font-medium">Out-licensing:</strong> Gerar receita licenciando as próprias tecnologias.</li>
+                                <li><strong class="font-medium">Cross-licensing:</strong> Acordos de licenciamento mútuo de patentes.</li>
+                                <li><strong class="font-medium">Transferência de Tecnologia Universidade-Empresa:</strong> A Lei de Inovação incentiva essa transferência no Brasil. Os NITs têm papel chave.</li>
+                                <li><strong class="font-medium">Contratos de Compensação (Offset):</strong> Exigem TT em grandes aquisições de defesa, visando capacitar a indústria nacional. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p.6-7])</li>
+                           </ul>
+                           <p>A capacidade de absorção da tecnologia pela indústria nacional é um fator crítico para o sucesso da TT. ([PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf p.7])</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Uso de Informação Patentária para Inteligência Competitiva</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">Os bancos de dados de patentes são uma fonte riquíssima de informação tecnológica e de mercado ([GuiaDocente Cap. 4.4], [WIPOSpace]). A análise sistemática desses dados (inteligência patentária ou patentometria) pode revelar:</p>
+                           <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Estado da Técnica:</strong> Identificar o que já existe.</li>
+                                <li><strong class="font-medium">Tendências Tecnológicas:</strong> Observar a evolução da tecnologia.</li>
+                                <li><strong class="font-medium">Atividades de Concorrentes:</strong> Monitorar P&D e estratégias de mercado.</li>
+                                <li><strong class="font-medium">Potenciais Parceiros ou Licenciadores.</strong></li>
+                                <li><strong class="font-medium">Identificação de "Espaços Brancos":</strong> Nichos para inovação original.</li>
+                                <li><strong class="font-medium">Riscos de Infração.</strong></li>
+                           </ul>
+                           <p class="mt-2">O "Mapeamento Patentário Sobre as Tecnologias Aeroespaciais..." ([42426-Texto do Artigo...]) é um exemplo de como a análise de patentes pode fornecer insights sobre o cenário de inovação de um setor específico no Brasil.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo 8 -->
+            <div id="module8" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Módulo 8: Estudos de Caso e Perspectivas Futuras</h2>
+                <p class="mb-6 text-gray-700">Neste módulo final, aplicaremos os conhecimentos adquiridos através da análise de estudos de caso hipotéticos, mas realistas, do setor espacial brasileiro. Além disso, refletiremos sobre as tendências futuras em tecnologias espaciais e suas complexas implicações para o sistema de Propriedade Intelectual, considerando o papel do Brasil na emergente e dinâmica era do "New Space".</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Estudos de Caso (Cenários Brasileiros)</span>
+                            <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">Analisaremos os seguintes cenários para aplicar os conceitos de PI:</p>
+                            <ol class="list-decimal pl-5 space-y-3">
+                                <li>
+                                    <strong class="font-medium">CubeSat Universitário Inovador:</strong> Uma equipe de estudantes e professores de uma universidade pública brasileira desenvolve um novo sistema de comunicação para CubeSats.
+                                    <ul class="list-disc pl-4 mt-1">
+                                        <li>PI aplicável: Patente (sistema), Direito Autoral (software), Marca (nome).</li>
+                                        <li>Desafios: Custos, titularidade (Lei de Inovação), busca de anterioridade.</li>
+                                        <li>Transferência: Licenciamento para empresa.</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong class="font-medium">Startup de Dados de Observação da Terra:</strong> Desenvolve algoritmos de IA para agronegócio.
+                                    <ul class="list-disc pl-4 mt-1">
+                                        <li>Proteção: Segredo industrial ou patente de software (com ressalvas).</li>
+                                        <li>Marca: Essencial para reconhecimento.</li>
+                                        <li>PI para investimento: Atrai venture capital.</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong class="font-medium">Novo Propelente para Foguetes no IAE:</strong> Formulação mais eficiente e menos tóxica.
+                                    <ul class="list-disc pl-4 mt-1">
+                                        <li>Patenteabilidade: Formulação e processo.</li>
+                                        <li>Estratégia: Patentear o núcleo e manter know-how como segredo.</li>
+                                        <li>Licenciamento: Para empresas nacionais.</li>
+                                        <li>Colaboração internacional: Definir titularidade da PI.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Tendências Futuras em Tecnologias Espaciais e Implicações para a PI</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">O setor espacial está em constante evolução. Essas tendências trarão novos desafios para a PI:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="font-medium">Inteligência Artificial (IA) no Espaço:</strong> Titularidade de invenções por IA, proteção de algoritmos e dados. A integração de IA em sistemas de controle de missão e análise de dados espaciais levanta questões sobre quem detém a PI de uma criação gerada autonomamente por uma IA. ([WIPOSpace p.6])</li>
+                                <li><strong class="font-medium">Computação Quântica:</strong> Impacto na criptografia (que protege segredos industriais e comunicações) e desafios no patenteamento de algoritmos e hardware quânticos.</li>
+                                <li><strong class="font-medium">Utilização de Recursos In-Situ (ISRU):</strong> Direitos sobre tecnologias de extração e aplicação da PI no espaço. O Tratado do Espaço Exterior de 1967 proíbe a apropriação nacional de corpos celestes, mas não é claro sobre a exploração comercial de recursos e a PI associada.</li>
+                                <li><strong class="font-medium">Mega-constelações de Satélites:</strong> Gestão de espectro, PI em tecnologias de comunicação entre satélites, antenas de solo, e sistemas de gerenciamento de rede. Questões de interoperabilidade e padrões podem envolver licenciamento de patentes essenciais (SEPs). ([WIPOSpace p.4])</li>
+                                <li><strong class="font-medium">Computação Aérea e Redes Integradas Espaço-Ar-Solo (SAG-IoT):</strong> Desafios de PI em arquiteturas de computação distribuída, segurança de dados em redes heterogêneas e gerenciamento de identidades de dispositivos. ([Aerial_Computing_A_New_Computing_Paradigm_Applicat.pdf], [wang2022blockchain.pdf])</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>A PI na Era do "New Space" e o Cenário Brasileiro</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                           <p class="mb-2">A era do "New Space" é marcada por <strong class="font-medium">atores privados, startups e modelos ágeis</strong>, com foco na redução de custos e na democratização do acesso ao espaço. ([42426-Texto do Artigo... p.3], [WIPOSpace p.9])</p>
+                           <p class="mb-2">Neste novo contexto:</p>
+                           <ul class="list-disc pl-5 mb-2 space-y-1">
+                               <li><strong class="font-medium">Agilidade e PI:</strong> Startups precisam de estratégias de PI flexíveis (patentes, segredos, marcas, direitos autorais). A velocidade de desenvolvimento muitas vezes torna longos processos de patenteamento um desafio.</li>
+                               <li><strong class="font-medium">Colaboração e Open Innovation:</strong> Gestão da PI em ambientes colaborativos e uso de hardware/software de código aberto.</li>
+                               <li><strong class="font-medium">Foco em Aplicações e Serviços:</strong> PI em software, algoritmos, modelos de negócio e marcas para serviços de dados espaciais.</li>
+                           </ul>
+                           <p class="mb-2">Para o <strong class="font-medium">Brasil</strong>, o New Space é uma oportunidade. Fomentar SpaceTechs com cultura de PI e apoio para proteger e internacionalizar suas inovações será fundamental. ([42426-Texto do Artigo... p.4]) Isso requer políticas de incentivo, acesso a financiamento, capacitação em gestão de PI e um sistema de PI eficiente.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white p-5 rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Debate Final: O Futuro da PI e da Indústria Espacial Brasileira</span>
+                             <span class="transform transition-transform duration-300">&#9662;</span>
+                        </button>
+                        <div class="accordion-content mt-2 text-gray-600">
+                            <p class="mb-2">Para concluir o curso, propomos uma reflexão sobre questões chave:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>Como o Brasil pode otimizar o uso do sistema de PI para alavancar sua indústria espacial?</li>
+                                <li>Quais são as áreas prioritárias para desenvolvimento e proteção de PI no Programa Espacial Brasileiro?</li>
+                                <li>Como a legislação de PI precisará se adaptar às inovações disruptivas do setor espacial?</li>
+                                <li>Qual o equilíbrio ideal entre proteção de PI e acesso aberto a tecnologias e dados espaciais?</li>
+                                <li>Como fomentar maior colaboração entre ICTs, empresas e governo no Brasil para transformar P&D espacial em ativos de PI valiosos?</li>
+                            </ul>
+                            <p class="mt-2">A discussão dessas questões é vital para o Brasil traçar um caminho estratégico, utilizando a PI para impulsionar sua soberania tecnológica e participação na economia espacial global.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo de Referências -->
+            <div id="moduleReferences" class="module-content">
+                <h2 class="text-3xl font-bold mb-4">Referências</h2>
+                <p class="mb-6 text-gray-700">Esta seção lista os principais documentos e fontes utilizados na elaboração deste curso interativo.</p>
+                <div class="bg-white p-5 rounded-lg shadow-sm space-y-3">
+                    <div class="ref-item">
+                        <strong class="font-medium text-accent">GuiaDocente:</strong> INSTITUTO NACIONAL DA PROPRIEDADE INDUSTRIAL (INPI); CONFEDERAÇÃO NACIONAL DA INDÚSTRIA (CNI). <em class="italic">Inovação e Propriedade Intelectual: Guia para o Docente</em>. Brasília, DF: INPI/CNI, [data de publicação, se disponível]. (Arquivo: guia-para-o-docente.pdf)
+                    </div>
+                    <div class="ref-item">
+                        <strong class="font-medium text-accent">IntroIP:</strong> KLINE, David; KAPPOS, David. <em class="italic">Introduction to Intellectual Property</em>. OpenStax, Michelson 20MM Foundation, 2021. (Arquivo: Introduction_to_Intellectual_Property_2PYaEdp.pdf)
+                    </div>
+                    <div class="ref-item">
+                        <strong class="font-medium text-accent">WIPOSpace:</strong> WORLD INTELLECTUAL PROPERTY ORGANIZATION (WIPO). <em class="italic">WIPO Technology Trends - Technical Annex: Future of Transportation in Space</em>. Geneva: WIPO, 2025 (previsto). (Arquivo: wipo-pub-1055-2025-space-en-wipo-technology-trends-technical-annex-the-future-of-transportation-in-space.pdf)
+                    </div>
+                     <div class="ref-item">
+                        <strong class="font-medium text-accent">DefesaTT:</strong> SILVA, Leonardo Ferreira Barbosa da. Propriedade intelectual, inovação e transferência de tecnologia nas aquisições da indústria de defesa. <em class="italic">Revista do Juca</em>, Vol. 01, 2017. (Arquivo: PROPRIEDADE_INTELECTUAL_INOVACAO_E_TRANS.pdf)
+                    </div>
+                    <div class="ref-item">
+                        <strong class="font-medium text-accent">MapeamentoPatBR:</strong> REIS, Marcello Carvalho dos; WEHMANN, Claus Franz; MARTINEZ, Maria Elisa Marciano; REIS, Patrícia Carvalho dos. Mapeamento Patentário Sobre as Tecnologias Aeroespaciais das Instituições de Pesquisa e das Empresas Brasileiras. <em class="italic">Cadernos de Prospecção</em >, Salvador, v. 14, n. 4, p. 1219-1235, dezembro, 2021. (Arquivo: 42426-Texto do Artigo-182280-2-10-20220525.pdf)
+                    </div>
+                    <div class="ref-item">
+                        <strong class="font-medium text-accent">WIPOBlockchainWeb:</strong> WORLD INTELLECTUAL PROPERTY ORGANIZATION (WIPO). Emerging technology in detail: blockchain in satellite communications. <em class="italic">WIPO Technology Trends Report 2025: Future of Transportation - Technical Annex: Space</em>. Disponível em: https://www.wipo.int/web-publications/wipo-technology-trends-technical-annex-future-of-transportation-in-space/en/emerging-technology-in-detail-blockchain-in-satellite-communications.html.
+                    </div>
+                    <div class="ref-item">
+                        <strong class="font-medium text-accent">LatencyIoTBlockchain:</strong> ALRUBEI, S.; BALL, E.; RIGELSFORD, J.; WILLIS, C. Latency and Performance Analyses of Real-World Wireless IoT-Blockchain Application. <em class="italic">IEEE Sensors Journal</em >, vol. 20, no. 13, pp. 7372-7383, 2020. (Arquivo: Latency_and_Performance_Analyses_of_Real-World_Wireless_IoT-Blockchain_Application_v0.2.pdf)
+                    </div>
+                     <div class="ref-item">
+                        <strong class="font-medium text-accent">AerialComputing:</strong> PHAM, Quoc-Viet; RUBY, Rukhsana; FANG, Fang; NGUYEN, Dinh C.; YANG, Zhaohui; LE, Mai; DING, Zhiguo; HWANG, Won-Joo. Aerial Computing: A New Computing Paradigm, Applications, and Challenges. <em class="italic">IEEE Internet of Things Journal</em >, vol. 9, no. 11, pp. 8339-8363, Jun. 2022 (Pré-publicação arXiv:2204.02005v1). (Arquivo: Aerial_Computing_A_New_Computing_Paradigm_Applicat.pdf)
+                    </div>
+                     <div class="ref-item">
+                        <strong class="font-medium text-accent">BlockchainSatComms:</strong> TORKY, Mohamed; GABER, Tarek; GODA, Essam; SNÁŠEL, Václav; HASSANIEN, Aboul Ella. A Blockchain Protocol for Authenticating Space Communications between Satellites Constellations. <em class="italic">Aerospace</em >, 2022, 9, 495. (Arquivo: aerospace-09-00495-v2.pdf)
+                    </div>
+                     <div class="ref-item">
+                        <strong class="font-medium text-accent">BlockchainSAGIoT:</strong> WANG, Yuntao; SU, Zhou; NI, Jianbing; ZHANG, Ning; SHEN, Xuemin. Blockchain-Empowered Space-Air-Ground Integrated Networks: Opportunities, Challenges, and Solutions. <em class="italic">IEEE Communications Surveys & Tutorials</em >, vol. 24, no. 1, pp. 160-209, First Quarter 2022. (Arquivo: wang2022blockchain.pdf)
+                    </div>
+                    <p class="text-xs italic mt-4">Nota: O arquivo "Machine_Learning_and_End-to-End_Deep_Learning_for_the_Detection_of_Chronic_Heart_Failure_From_Heart_Sounds.pdf" não foi diretamente utilizado para o conteúdo deste curso focado em PI e Indústria Espacial, mas consta na lista de arquivos fornecidos.</p>
+                </div>
+            </div>
+
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('#course-nav a');
+            const moduleContents = document.querySelectorAll('.module-content');
+            const accordions = document.querySelectorAll('.accordion-header');
+            let charts = {}; 
+            
+            const podcastAudio = document.getElementById('podcastAudio');
+            const playPodcastBtn = document.getElementById('playPodcastBtn');
+            const pausePodcastBtn = document.getElementById('pausePodcastBtn');
+            
+            playPodcastBtn.addEventListener('click', () => {
+                podcastAudio.play().catch(error => console.error("Erro ao tocar áudio:", error));
+            });
+
+            pausePodcastBtn.addEventListener('click', () => {
+                podcastAudio.pause();
+            });
+
+            podcastAudio.onplay = () => {
+                playPodcastBtn.disabled = true;
+                pausePodcastBtn.disabled = false;
+            };
+            podcastAudio.onpause = () => {
+                playPodcastBtn.disabled = false;
+                pausePodcastBtn.disabled = true;
+            };
+             podcastAudio.onended = () => {
+                playPodcastBtn.disabled = false;
+                pausePodcastBtn.disabled = true;
+            };
+
+
+            function destroyCharts() {
+                Object.values(charts).forEach(chart => {
+                    if (chart && typeof chart.destroy === 'function') chart.destroy();
+                });
+                charts = {};
+            }
+            
+            function wrapLabel(str, maxWidth = 16) {
+                if (typeof str !== 'string' || str.length <= maxWidth) return str;
+                const words = str.split(' ');
+                const lines = [];
+                let currentLine = '';
+                words.forEach(word => {
+                    if ((currentLine + word).length > maxWidth && currentLine.length > 0) {
+                        lines.push(currentLine.trim());
+                        currentLine = '';
+                    }
+                    currentLine += word + ' ';
+                });
+                if (currentLine.trim().length > 0) {
+                     lines.push(currentLine.trim());
+                }
+                return lines.length > 0 ? lines : [str]; 
+            }
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                if (!item || !item.chart || !item.chart.data || !item.chart.data.labels) return '';
+                let label = item.chart.data.labels[item.dataIndex];
+                return Array.isArray(label) ? label.join(' ') : label;
+            };
+            
+            const chartDefaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { title: tooltipTitleCallback } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: '#495057' }, grid: { color: '#dee2e6'} },
+                    x: { ticks: { color: '#495057', callback: function(value, index, values) {
+                            const label = this.getLabelForValue(value);
+                            return Array.isArray(label) ? label : wrapLabel(label, 10); 
+                        } }, 
+                        grid: { display: false }
+                    }
+                },
+                font: { family: 'Inter' },
+            };
+
+
+            function showModule(moduleId) {
+                moduleContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                const activeContent = document.getElementById(moduleId);
+                if (activeContent) {
+                    activeContent.classList.add('active');
+                }
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + moduleId) {
+                        link.classList.add('active');
+                    }
+                });
+
+                destroyCharts(); 
+                if (moduleId === 'module4') {
+                    createModule4Charts();
+                } else if (moduleId === 'module5') {
+                    createGlobalPatentCharts();
+                } else if (moduleId === 'module6') {
+                    createBrazilPatentCharts();
+                }
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const moduleId = this.getAttribute('href').substring(1);
+                    history.pushState(null, null, '#' + moduleId);
+                    showModule(moduleId);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+
+            accordions.forEach(accordion => {
+                accordion.addEventListener('click', function () {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('span:last-child');
+                    if (content.style.maxHeight && content.style.maxHeight !== "0px") {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            function handleInitialLoad() {
+                let initialModuleId = 'module1';
+                if (window.location.hash) {
+                    const hashModuleId = window.location.hash.substring(1);
+                    if (document.getElementById(hashModuleId)) {
+                        initialModuleId = hashModuleId;
+                    }
+                }
+                showModule(initialModuleId);
+            }
+
+            window.addEventListener('popstate', handleInitialLoad);
+            handleInitialLoad();
+            
+            function createGlobalPatentCharts() {
+                Chart.defaults.font.family = 'Inter';
+                Chart.defaults.color = '#495057';
+
+                const patentTrendCanvas = document.getElementById('patentTrendChart');
+                if (patentTrendCanvas) {
+                    charts.patentTrend = new Chart(patentTrendCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: ['2000', '2005', '2010', '2015', '2020', '2023'],
+                            datasets: [{
+                                label: 'Famílias de Patentes Publicadas',
+                                data: [1400, 1300, 1400, 2500, 6000, 9000], // Dados da Fig D2, WIPOSpace p.8
+                                borderColor: '#007bff',
+                                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                                borderWidth: 2, tension: 0.3, fill: true,
+                            }]
+                        },
+                        options: { ...chartDefaultOptions, plugins: { ...chartDefaultOptions.plugins, title: { display: true, text: 'Evolução Global de Patentes em Tecnologias Espaciais', font: { size: 16 } , color: '#343a40' }}}
+                    });
+                }
+
+                const countryCanvas = document.getElementById('countryChart');
+                if(countryCanvas) {
+                    charts.country = new Chart(countryCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: { // Dados da Fig D7, WIPOSpace p.14
+                            labels: ['China', 'EUA', 'Japão', 'Rep. Coreia', 'França', 'Alemanha', 'Rússia', 'Reino Unido', 'Canadá', 'Índia'].map(l => wrapLabel(l)),
+                            datasets: [{
+                                data: [38183, 16960, 6546, 4580, 2161, 2125, 1762, 1444, 896, 514],
+                                backgroundColor: ['#dc3545', '#007bff', '#28a745', '#ffc107', '#6f42c1', '#fd7e14', '#17a2b8', '#6610f2', '#20c997', '#e83e8c'],
+                            }]
+                        },
+                        options: { ...chartDefaultOptions, indexAxis: 'y', plugins: { ...chartDefaultOptions.plugins, title: { display: true, text: 'Top Países Inventores (2000-2023)', font: { size: 16 }, color: '#343a40' }}}
+                    });
+                }
+
+                const ownerCanvas = document.getElementById('ownerChart');
+                if (ownerCanvas) {
+                    charts.owner = new Chart(ownerCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: { // Dados da Fig D13, WIPOSpace p.23 (Top 10)
+                            labels: [
+                                wrapLabel('Academia Chinesa de Ciências (China)'), 
+                                wrapLabel('CASC (China)'), 
+                                wrapLabel('Boeing (EUA)'), 
+                                wrapLabel('Mitsubishi Electric (Japão)'), 
+                                wrapLabel('China Electronics Tech. Group (China)'),
+                                wrapLabel('Airbus (Europa)'),
+                                wrapLabel('Beihang University (China)'),
+                                wrapLabel('Qualcomm (EUA)'),
+                                wrapLabel('Harbin Inst. of Technology (China)'),
+                                wrapLabel('Xidian University (China)')
+                            ],
+                            datasets: [{
+                                data: [2186, 1798, 1416, 1061, 1021, 852, 843, 786, 722, 687],
+                                backgroundColor: ['#28a745', '#ffc107', '#007bff', '#dc3545', '#6f42c1', '#fd7e14', '#17a2b8', '#6610f2', '#20c997', '#e83e8c'],
+                            }]
+                        },
+                        options: { ...chartDefaultOptions, indexAxis: 'y', plugins: { ...chartDefaultOptions.plugins, title: { display: true, text: 'Top Titulares de Patentes (2000-2023)', font: { size: 16 }, color: '#343a40' }}}
+                    });
+                }
+            }
+
+            function createBrazilPatentCharts() {
+                Chart.defaults.font.family = 'Inter';
+                Chart.defaults.color = '#495057';
+
+                const depositorsCanvas = document.getElementById('brazilDepositorsPieChart');
+                if (depositorsCanvas) {
+                    charts.brazilDepositors = new Chart(depositorsCanvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: { // Dados do Artigo 42426-Texto do Artigo..., p.9 (Gráfico 2)
+                            labels: [['Indústrias de Interesse', 'da Defesa (62%)'], ['Instituições de Ensino', 'e Pesquisa (38%)']].map(l => Array.isArray(l) ? l : wrapLabel(l)),
+                            datasets: [{
+                                data: [62, 38],
+                                backgroundColor: ['#007bff', '#28a745'],
+                                borderColor: '#f8f9fa',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: { ...chartDefaultOptions, plugins: { ...chartDefaultOptions.plugins, title: { display: true, text: 'Depósitos de Patentes Aeroespaciais no Brasil por Tipo de Instituição', font: {size: 14}, color: '#343a40'}, legend: { position: 'bottom' }}}
+                    });
+                }
+
+                const techCanvas = document.getElementById('brazilTechBarChart');
+                if (techCanvas) {
+                    charts.brazilTech = new Chart(techCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: { // Dados do Artigo 42426-Texto do Artigo..., p.7 (Gráfico 1)
+                            labels: [['Métodos e Sistemas', '(45%)'], ['Veículo Cosmonáutico,', 'Satélites e Peças (36%)'], ['Sensores e', 'Instrumentação (10%)'], 'Outros (9%)'].map(l => Array.isArray(l) ? l : wrapLabel(l)),
+                            datasets: [{
+                                data: [45, 36, 10, 9], 
+                                backgroundColor: ['#007bff', '#ffc107', '#dc3545', '#6c757d']
+                            }]
+                        },
+                        options: { ...chartDefaultOptions, indexAxis: 'y', plugins: { ...chartDefaultOptions.plugins, title: { display: true, text: 'Principais Tecnologias Patenteadas no Brasil (Aeroespacial)', font: {size: 14}, color: '#343a40'}}, scales: { ...chartDefaultOptions.scales, x: {...chartDefaultOptions.scales.x, title: { display: true, text: '% do Total de Patentes Analisadas'} } }}
+                    });
+                }
+            }
+            
+            function createModule4Charts() {
+                 Chart.defaults.font.family = 'Inter';
+                 Chart.defaults.color = '#495057';
+
+                const commonLineOptions = (titleText, yLabel = 'Nº de Famílias de Patentes') => ({
+                    ...chartDefaultOptions,
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        title: { display: true, text: titleText, font: { size: 14 }, color: '#343a40' },
+                        legend: { position: 'bottom', labels:{boxWidth:12, font:{size:10}} }
+                    },
+                     scales: {
+                        y: { ...chartDefaultOptions.scales.y, title: { display: true, text: yLabel, font:{size:10} } },
+                        x: { ...chartDefaultOptions.scales.x, title: { display: true, text: 'Ano', font:{size:10} } }
+                    }
+                });
+                
+                const susPropCanvas = document.getElementById('sustainablePropulsionChart');
+                if(susPropCanvas) { // Data from WIPOSpace Fig D16, p.28
+                    charts.susProp = new Chart(susPropCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: ['2000', '2006', '2012', '2018', '2022', '2023'],
+                            datasets: [
+                                { label: 'Propulsão Elétrica', data: [70, 50, 70, 170, 200, 293], borderColor: '#007bff', fill: false, tension: 0.1 },
+                                { label: 'Baterias', data: [22, 30, 70, 130, 140, 152], borderColor: '#28a745', fill: false, tension: 0.1 },
+                                { label: 'Hidrogênio/Cél. Comb.', data: [2, 5, 10, 30, 35, 45], borderColor: '#ffc107', fill: false, tension: 0.1 },
+                                { label: 'Comb. Carbono Sust.', data: [5, 2, 3, 10, 15, 20], borderColor: '#dc3545', fill: false, tension: 0.1 }
+                            ]
+                        },
+                        options: commonLineOptions('Patentes em Propulsão Sustentável')
+                    });
+                }
+
+                const autoCircCanvas = document.getElementById('automationCircularityChart');
+                 if(autoCircCanvas) { // Data from WIPOSpace Fig D25, p.35
+                    charts.autoCirc = new Chart(autoCircCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: ['2000', '2006', '2012', '2018', '2022', '2023'],
+                            datasets: [
+                                { label: 'Produção Inteligente', data: [17, 20, 80, 280, 380, 397], borderColor: '#007bff', fill:false, tension:0.1 },
+                                { label: 'Uso Eficiente Materiais', data: [5, 5, 20, 40, 55, 62], borderColor: '#28a745', fill:false, tension:0.1 },
+                                { label: 'Reciclagem', data: [1, 2, 3, 4, 8, 11], borderColor: '#ffc107', fill:false, tension:0.1 }
+                            ]
+                        },
+                        options: commonLineOptions('Patentes em Automação e Circularidade')
+                    });
+                }
+
+                const commSecCanvas = document.getElementById('commsSecurityChart');
+                if(commSecCanvas){ // Data from WIPOSpace Fig D34, p.43
+                    charts.commSec = new Chart(commSecCanvas.getContext('2d'),{
+                        type: 'line',
+                        data: {
+                            labels: ['2000', '2006', '2012', '2018', '2022', '2023'],
+                            datasets: [
+                                { label: 'Com. Baixa Latência', data: [1300, 1000, 1800, 4000, 7800, 8217], borderColor: '#007bff', fill:false, tension:0.1 },
+                                { label: 'Navegação', data: [266, 250, 500, 1200, 1600, 1704], borderColor: '#28a745', fill:false, tension:0.1 },
+                                { label: 'Com. D2D', data: [346, 200, 300, 450, 600, 643], borderColor: '#ffc107', fill:false, tension:0.1 },
+                                { label: 'Cloud', data: [15, 20, 50, 150, 250, 284], borderColor: '#dc3545', fill:false, tension:0.1 },
+                                { label: 'Cibersegurança', data: [10, 15, 30, 70, 90, 103], borderColor: '#6f42c1', fill:false, tension:0.1 }
+                            ]
+                        },
+                        options: commonLineOptions('Patentes em Comunicação e Segurança')
+                    });
+                }
+
+                const hmiCanvas = document.getElementById('hmiChart');
+                if(hmiCanvas){ // Data from WIPOSpace Fig D43, p.50
+                     charts.hmi = new Chart(hmiCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: ['2000', '2006', '2012', '2018', '2022', '2023'],
+                             datasets: [
+                                { label: 'VR/AR/XR, Metaverso', data: [5, 12, 15, 60, 120, 124], borderColor: '#007bff', fill:false, tension:0.1 },
+                                { label: 'Touch Display & Luvas de Dados', data: [28, 55, 60, 50, 45, 47], borderColor: '#28a745', fill:false, tension:0.1 },
+                                { label: 'Recon. Facial', data: [0, 8, 12, 15, 12, 10], borderColor: '#ffc107', fill:false, tension:0.1 },
+                                { label: 'Recon. de Fala', data: [4,10,12,14,10,11], borderColor: '#dc3545', fill:false, tension:0.1},
+                                { label: 'HUD Head-up Display', data:[2,1,3,5,8,9], borderColor: '#6f42c1', fill:false, tension:0.1}
+                            ]
+                        },
+                        options: commonLineOptions('Patentes em Interface Homem-Máquina')
+                    });
+                }
+                
+                const amPubCanvas = document.getElementById('amPublicationsChart');
+                if(amPubCanvas){ // Data from WIPOSpace Fig D52, p.59
+                    charts.amPub = new Chart(amPubCanvas.getContext('2d'), {type:'line', data: { labels: ['2014','2016','2018','2020','2022','2023'], datasets:[{label:'Pub. Científicas', data:[1,7,7,5,10,17], borderColor:'#007bff', fill:false, tension:0.1}]}, options: commonLineOptions('Publicações Científicas em MA no Espaço', 'Nº de Publicações')});
+                }
+                const amPatCanvas = document.getElementById('amPatentsChart');
+                if(amPatCanvas){ // Data from WIPOSpace Fig D54, p.60
+                     charts.amPat = new Chart(amPatCanvas.getContext('2d'), {type:'line', data: { labels: ['2014','2016','2018','2020','2022','2023'], datasets:[{label:'Patentes', data:[10,18,25,30,40,46], borderColor:'#28a745', fill:false, tension:0.1}]}, options: commonLineOptions('Patentes em MA no Espaço')});
+                }
+                const bcPubCanvas = document.getElementById('blockchainPublicationsChart');
+                 if(bcPubCanvas){ // Data from WIPOSpace Fig D56, p.65
+                    charts.bcPub = new Chart(bcPubCanvas.getContext('2d'), {type:'line', data: { labels: ['2017','2019','2021','2023'], datasets:[{label:'Pub. Científicas', data:[1,10,30,44], borderColor:'#007bff', fill:false, tension:0.1}]}, options: commonLineOptions('Publicações Científicas em Blockchain Espacial', 'Nº de Publicações')});
+                }
+                const bcPatCanvas = document.getElementById('blockchainPatentsChart');
+                if(bcPatCanvas){ // Data from WIPOSpace Fig D58, p.66
+                    charts.bcPat = new Chart(bcPatCanvas.getContext('2d'), {type:'line', data: { labels: ['2017','2019','2021','2023'], datasets:[{label:'Patentes', data:[0,8,25,57], borderColor:'#28a745', fill:false, tension:0.1}]}, options: commonLineOptions('Patentes em Blockchain Espacial')});
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
